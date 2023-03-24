@@ -1,0 +1,856 @@
+%% Next line for the spell checker to disable warnings about $f(x)^2$ vs $f{(x)}^2$.
+% chktex-file 3 
+%%%
+ 
+\documentclass[10pt, a4paper]{article}
+%\documentclass[10pt, a4paper, openany, draft]{book}
+    
+
+%%%%%%%%%%%%%%%%%%%%
+%%% To relabel equations with AUCTeX use the command
+%%%   M-x reftex-renumber-simple-labels 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% Standard packages
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% amsmath,amssymb,    
+
+%\usepackage{graphicx}% Include figure files   
+%\usepackage{dcolumn}% Align table columns on decimal point
+ 
+%\usepackage[mathlines]{lineno}% Enable numbering of text and display math
+%\linenumbers\relax % Commence numbering lines
+ 
+\usepackage{enumerate}%i), ii) etc...
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+%\usepackage{mathptmx}
+
+\usepackage{amsmath,amssymb}
+\usepackage{mathtools}  
+\usepackage{amsthm} %% For \newtheorem{}{}
+\usepackage{mathrsfs} %% \mathscr
+%\usepackage{stix} %% 
+\usepackage{bbm} %% \mathbbm to get the blackboard bold 1
+
+\usepackage{hyperref}
+
+\usepackage{slashed}
+
+
+\usepackage{soul} %% \ul for underline which wraps at the end of line
+
+\usepackage{tikz}
+\usepackage{tikz-cd} %% commutative diagrams
+\usetikzlibrary{arrows}
+\tikzcdset{arrow style=tikz, diagrams={>=stealth}} %%smaller arrow heads
+\usepackage{graphicx}  
+
+\usetikzlibrary{shapes.geometric,quotes}
+
+
+\usepackage{simplewick}
+%\usepackage{wick}
+
+%\usepackage{genyoungtabtikz}
+
+
+
+\usepackage{etoolbox}
+
+%\usepackage{dsfont} %double stroke character alternative to \mathbb 
+%\usepackage{amssymb}  %% For \mathbb %%% package is redundant when using 'stix' package
+%\usepackage{bbold} %% must be placed *after* amssymb to get the nice \mathbb{1}
+%\usepackage{bm}% bold math
+%\usepackage{stix2}
+%\usepackage{boondox-cal}
+%\usepackage[cal=boondox]{mathalfa}
+%\usepackage{pzccal}
+%\usepackage{frcursive}
+%%%%
+%%%%%%%%[Standard packages]
+
+
+%\usepackage[title]{appendix}
+\usepackage{appendix}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%  Standard environments
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem*{theorem*}{Theorem} 
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}{Corollary}[theorem]
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{definition}
+\newtheorem*{definitions}{Definitions}
+\theoremstyle{definition}
+\newtheorem*{definition*}{Definition}
+
+%\numberwithin{equation}{definition}
+
+\theoremstyle{definition}
+\newtheorem{remark}[theorem]{Remark}
+\theoremstyle{definition}
+\newtheorem*{remark*}{Remark}
+\theoremstyle{definition}
+\newtheorem{remarks}[theorem]{Remarks}
+\theoremstyle{definition}
+\newtheorem*{remarks*}{Remarks}
+
+\theoremstyle{remark}
+\newtheorem{claim}[theorem]{Claim}
+%\theoremstyle{remark}
+%\newtheorem*{claim*}[theorem]{Claim}
+\theoremstyle{remark}
+\newtheorem{idea}[theorem]{Idea}
+\newtheorem{example}[theorem]{Example}
+\newtheorem*{example*}{Example}
+\newtheorem*{examples*}{Examples}
+
+%%%  -------------------------------------------------------------------
+%%%  Define a "rudin-style-paragraph" (:-D)
+%%%  -------------------------------------------------------------------
+%%%
+%%% This is the better version which actually defines a *new* theorem style instead
+%%% of re-defining the existing one...
+\newtheoremstyle{rudin-style-generic}
+	{}% <Space above>
+	{}% <Space below>
+	{}% <Body font>
+	{}% <Indent amount>
+	{\bfseries}% <Head font>
+	{}% <Punctuation head>	
+	{ }% <Space after head>
+	% {\thmnumber{\S\hspace{2pt}#2} \thmname{#1.}\thmnote{\phantom{,}#3 }}% <Theorem head spec>
+        {\thmnumber{#2} \thmname{#1.}\thmnote{\phantom{,}#3 }}% <Theorem head spec>
+\newtheoremstyle{rudin-style-generic*}{}{}{}{}{\bfseries}{}{ }{\thmname{#1}\thmnote{#3}}
+\theoremstyle{rudin-style-generic}
+\newtheorem{parpar}{}[section]
+\theoremstyle{rudin-style-generic*}
+\newtheorem{parpar*}{}[]{}
+%\AtEndEnvironment{parpar*}{\phantom{a}\null\hfill\S}%  %%% requires \usepackage{etoolbox}
+%\AtEndEnvironment{parpar}{\null\hfill\S}%   %%% requires \usepackage{etoolbox}
+\newenvironment{parpar-noproof}
+  {%\renewcommand{\qedsymbol}{$\heartsuit$}%
+   \pushQED{\qed}\begin{parpar}}
+  {\popQED\end{parpar}}
+
+%%% "Rudin" theorem-style with bodyfont = itshape
+\newtheoremstyle{rudin-style-theorem}{}{}{\itshape}{}{\bfseries}{}{ }{\thmnumber{\S\hspace{2pt}#2} \thmname{#1.}\thmnote{\phantom{,}#3}}
+\theoremstyle{rudin-style-theorem}
+\newtheorem{parpar-theorem}[parpar]{Theorem}
+\newtheorem{parpar-proposition}[parpar]{Proposition}
+\newtheorem{parpar-lemma}[parpar]{Lemma}
+\newtheorem{parpar-corollary}[parpar]{Corollary}
+
+%%% "Rudin" proof-environment with wider left margin 
+\newenvironment{parpar-proof}[1][\scshape    %%%\shshape=small cap font
+\proofname]
+{%
+	\proof[#1]%
+	\setlength{\leftskip}{3em}%
+}
+{%
+	\endproof%
+      }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% New \ref command for paragraphs \begin{parpar}....\end{parpar}
+%%%% ==============================================================
+%%%% It needs to a custom .cwl file if one wants autocompletion as for \ref
+%%%% For texstudio see:
+%%%% https://tex.stackexchange.com/questions/414281/configuring-auto-completion-with-texstudio
+%%%%
+\newcommand{\parref}[1]{\S\textbf{\ref{#1}}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\more}[1]{{{\noindent{}\hspace{-2cm}\color{red}{{$\blacktriangleright[[${{#1}}$]]$}}}}}
+
+
+%%%---------------------------------------------------------------------
+%%%  -------------------------------------------------------------------
+%%%  Proofs, QEDsymbol, etc, small paragraphs... 
+%%%  -------------------------------------------------------------------
+%%%
+%%% Extract Yinyang from the package marvosym to use it as qed symbol :^)
+%\newcommand{\YinYangQED}{{\usefont{U}{mvs}{m}{n}\symbol{89}}}
+%%% Make the Yin Yang the qed symbol
+%\renewcommand\qedsymbol{\YinYangQED}
+
+%%%% Change the qed box at the end of proof (older version 2)
+\newenvironment{funproof}[1][\scshape\proofname]
+{%
+	%\proof[#1]%
+	\renewcommand*\qedsymbol{‌​$\square$ (claim)}%
+	%\renewcommand*\qedsymbol{‌​$\YinYangQED$ (claim)}
+}
+{%
+	\endproof%
+}
+
+%\newcommand*\shortProof{(\textit{Proof.})}
+\newenvironment{shortproof}{{\small\scshape\proofname}.}{\hfill\footnotesize\qedsymbol}    
+%% to use inside enumerate or itemize environments
+%% the proof environment from amsthm would add too much white space
+%%% small proof: a proof in small font
+%% codied from
+%% http://tex.stackexchange.com/questions/148955/how-to-change-the-font-size-of-all-theorem-environments
+\newenvironment{smallproof}
+	{%
+	\vspace{.5em}
+	\setlength\parindent{0pt}%
+	\pushQED{\qed}%
+	\textsc{\footnotesize\proofname}.
+	\setlength{\leftskip}{3em}%
+	}
+	{%
+		\endproof\footnotesize\qedhere\popQED%\hfill\footnotesize\qedsymbol%
+	}
+\AtBeginEnvironment{smallproof}{\footnotesize}   %%requires \usepackage{etoolbox}
+
+\newenvironment{smallerparagraph}{}{}
+\AtBeginEnvironment{smallerparagraph}{\small}    %%requires \usepackage{etoolbox}
+
+
+%%% environment with custom font size
+%% codied from
+%% http://tex.stackexchange.com/questions/4139/how-to-change-font-size-mid-document
+\newenvironment{computation}[1]
+{%
+	\clearpage
+	\let\orignewcommand\newcommand
+	\let\newcommand\renewcommand
+	\makeatletter
+	%\input{bk#1.clo}%% only for book class
+	\input{size10.clo}%
+	\makeatother
+	\let\newcommand\orignewcommand
+}
+{%
+	\clearpage
+}
+
+%%%%
+%%%%%%%%[Standard environments]
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% Standard notation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{mathtools}
+\newcommand\SmallMatrix[1]{{%
+  \tiny\arraycolsep=0.3\arraycolsep\ensuremath{\begin{pmatrix}#1\end{pmatrix}}}}
+
+\newcommand{\todo}[1]{{\color{red}\textit{[TO-DO#1]}}}
+
+
+\newcommand{\deq}{\stackrel{\mathrm{def}}{=}}
+\newcommand{\dd}{\,\mathrm{d}}
+\newcommand{\ii}{\mathrm{i}}
+\newcommand{\id}{\,\mathbb{I}}
+\DeclareMathOperator*{\Dom}{Dom}
+\DeclareMathOperator*{\Ran}{Range}
+\newcommand{\PP}{{\mathbb{P}}}
+\newcommand{\QQ}{{\mathbb{Q}}}
+\newcommand{\KK}{{\mathbb{K}}}
+
+
+\newcommand{\NN}{\mathbb N}
+\newcommand{\ZZ}{\mathbb Z}
+\newcommand{\RR}{\mathbb R}
+\newcommand{\CC}{\mathbb C}
+
+\newcommand{\Gg}{{\mathbf{G}}}
+\newcommand{\Hg}{{\mathbf{H}}}
+\newcommand{\Ng}{{\mathbf{N}}}
+\newcommand{\Sg}{{\mathbf{S}}}
+
+
+\newcommand{\HH}{\mathbb H}
+\newcommand{\TT}{\mathbb T} %% torus
+\newcommand{\Mat}{\mathrm M} %% space of matrices
+\DeclareMathOperator{\tr}{Tr}
+\DeclareMathOperator{\Span}{Span}
+\DeclareMathOperator{\idfunction}{id}
+
+%\newcommand{\st}{\left|\vphantom{\tfrac{1}{2}}\right.}
+\renewcommand{\st}{\,\mathbf:\,}
+%\newcommand{\st}{\,\mathbf:\,}
+\newcommand{\ST}{\,\mathbf:\,}
+\newcommand{\setset}[2]{\left\{#1\;  \mathbf: \; #2  \right\}}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% permanent, hafnian, pfaffian
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\DeclareMathOperator*{\pf}{pf}
+\DeclareMathOperator*{\haf}{haf}
+\DeclareMathOperator*{\per}{per}
+
+%%% sign (of a permutation for example)
+\DeclareMathOperator*{\sgn}{sgn}
+
+%% Tensor algebras
+\newcommand*{\TAlg}[1]{\Gamma_{\!\otimes}#1}
+\newcommand*{\SymTAlg}[1]{\Gamma_{\!\odot}#1}
+\newcommand*{\AntiTAlg}[1]{\Gamma_{\!\wedge}#1}
+%% Bosonic Fock space:
+%\newcommand*\BFock[1]{\bigodot\!#1} 
+\newcommand*\BFock[1]{\mathbb\Gamma_{\!\odot}#1} 
+%% Fermionic Fock space:
+%\newcommand*\FFock[1]{\bigwedge\!#1} 
+\newcommand*\FFock[1]{\mathbb\Gamma_{\!\wedge}#1}
+%% General Fock space:
+%\newcommand*\GFock[1]{\bigotimes\!#1} %{\mathscr{F}_{\otimes}}
+\newcommand*\GFock[1]{\mathbb\Gamma_{\!\otimes}#1} %{\mathscr{F}_{\otimes}}
+%% Finite number of particles - Scwartz wave functions - Bosonic Fock space
+\newcommand*\FSBFock{{\mathscr{F}_{s}^{0}}} 
+%% Deprecated
+\newcommand*{\FockNew}{{%
+		\text{\fontencoding{OT2}\selectfont\char3}% %\char3,\char5,\char88,\char16,\char17, I
+}}
+
+
+%%% (LIE) ALGEBRA %%%
+\newcommand*{\Cliff}{\mathcal C\ell}
+\newcommand*{\CCliff}{\CC\ell}
+\newcommand*{\SO}{\mathbf{SO}}
+\newcommand*{\SU}{\mathbf{SU}}
+\newcommand*{\UU}{\mathbf{U}}
+\newcommand*{\Spin}{\mathbf{Spin}}
+\newcommand*{\Pin}{\mathbf{Pin}}
+\newcommand*{\SL}{\mathbf{SL}}
+\newcommand*{\SLL}{{\mathbf{SL}(2,\CC)}}
+\newcommand*{\SLLR}{{{\mathbf{SL}(2,\CC)}_\RR}}
+\newcommand*{\iSLLR}{{{\mathbf{ISL}(2,\CC)}_\RR}}
+
+\newcommand*{\GL}{\mathbf{GL}}
+\newcommand*{\Sp}{\mathbf{Sp}}
+\newcommand*{\PoiUC}{\widetilde{\mathbf{\Pi}}}
+\newcommand*{\ISpin}{\mathbf{ISpin}}
+\newcommand*{\IPin}{\mathbf{IPin}}
+\newcommand*{\ISO}{\mathbf{ISO}}
+\newcommand*{\ad}{\mathfrak{a}\;\!\!\mathfrak{d}}
+\newcommand*{\Ad}{\text{Ad}\,}
+\newcommand*{\End}{\text{End}\,}
+\newcommand*{\Aut}{\text{Aut}\,}
+\newcommand*{\Diff}{\text{Diff}\,}
+\newcommand*{\Gau}{\text{Gau}\,}
+
+\newcommand*{\Oup}{{\mathscr{O}_{\mathring{v}}^\uparrow}} %% upper hyperboloid
+\newcommand*{\dOup}{{\dd_{\mathring v}^\uparrow}} %% measure on upper hyperboloid
+
+% \newcommand*{\rest}{\!\!\upharpoonright} %% restriction symbol
+\newcommand*{\rest}{{\upharpoonright}} %% restriction symbol
+
+\newcommand*{\ElleUpDown}{L}
+\newcommand*{\ElleUp}{{L^\Up}}
+\newcommand*{\ElleDown}{L^\Down}
+\newcommand*{\elleUpDown}{l}
+\newcommand*{\elleUp}{{l^\Up}}
+\newcommand*{\elleDown}{{l^\Down}}
+\newcommand*{\poff}{\mathpzc{p}}
+\newcommand*{\MC}{{\mathrm{M}_{\mathtt{C}}}}
+\newcommand*{\dotprod}{{\boldsymbol{\cdot}}}
+\newcommand*{\scalareta}[2]{{\langle{} {#1},{#2}{\rangle}_{\!\eta}}}
+\newcommand*{\scalardelta}[2]{{\langle{} {#1},{#2}{\rangle}_{\!\delta}}}
+
+
+\newcommand*{\pUp}{{p^\Up}}
+\newcommand*{\pUpDown}{{p}}
+\newcommand*{\pDown}{{p^\Down}}
+\newcommand*{\pST}{{\mathcal p}}
+
+
+% completed direct sum and product
+\DeclareMathOperator*{\Hoplus}{\widehat\oplus}
+\DeclareMathOperator*{\Hbigoplus}{\widehat{\bigoplus}}
+\DeclareMathOperator*{\Hotimes}{\widehat\otimes}
+\DeclareMathOperator*{\Hsymtimes}{\widehat\odot}
+\DeclareMathOperator*{\Hantitimes}{\widehat\wedge}
+\DeclareMathOperator*{\Hwedge}{\hat{\wedge}}
+
+%%% PROBABILITY %%%
+\newcommand{\Expect}{\mathbb{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+
+
+
+
+%%% exterior algebra symbol (similar to a big \Lambda)
+%%% taken from: http://tex.stackexchange.com/questions/61637/wedge-power-symbol
+\makeatletter
+\newcommand{\extp}{\@ifnextchar^\@extp{\@extp^{\,}}}
+\def\@extp^#1{\mathop{\bigwedge\nolimits^{\!#1}}}
+\makeatother
+%%% -- edit -- now it seams to work.. (??:^)
+%%% the previous commented section would be better but causes unexpected problems.. ;(
+%%% so I make do with the following
+%\newcommand*{\Extern}{\displaystyle\bigwedge\!}
+%%% --- edit --- since now the sofisticated method above seams to work I now define the following
+\newcommand*{\Extern}{{\extp}}
+
+
+%\usepackage{accents}
+%\newcommand{\ubar}[1]{\underaccent{\bar}{{#1}}}
+
+\usepackage{stackengine}
+
+\newcommand\ubar[1]{\stackunder[1.2pt]{$#1$}{\rule{.8ex}{.075ex}}}
+%%%%
+%%%%%%%%[Standard notation]
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% Notation for  Dirac Rosetta stone
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%\usepackage{MnSymbol} %% I need \ostar
+%\newcommand{\ostar}{{{\textcircled{$\star$}}}}
+%\usepackage{wasysym}
+%\newcommand{\ostar}{{\APLlog}}
+\newcommand{\ostar}{{\circledast}}
+
+
+% \newcommand{\PPpar}{{\mathbb P_{\mathrm{par}}}}
+%\newcommand{\PPant}{{\mathbb P_{\mathrm{ant}}}}
+\newcommand{\Par}{{\mathrm{par}}}
+\newcommand{\Ant}{{\mathrm{ant}}}
+\newcommand{\FW}{{\mathrm{FW}}}
+\newcommand{\ParRed}{\mathrm{PAR}}
+\newcommand{\AntRed}{\mathrm{ANT}}
+
+\newcommand{\tildegamma}{{\tilde{\gamma}}}
+
+
+\newcommand{\Even}{{\mathrm{even}}}
+\newcommand{\Odd}{{\mathrm{odd}}}
+
+\newcommand{\Orbit}{{\mathscr{O}_m^{\uparrow}}}
+
+\newcommand{\Vone}{{W}}
+\newcommand{\Vtwo}{{V}}
+\newcommand{\TZSpace}{{\mathfrak{H}}} %% time-zero space
+\newcommand{\TZDom}{{\mathscr S(\RR^3)\otimes\Vtwo}} %% time-zero domain
+\newcommand{\CovSpace}{{\mathcal{H}}} %% covariant space
+\newcommand{\DiracSpace}{{\mathcal{H}_{\mathrm{D}}}}
+\newcommand{\PASpace}{{\mathcal{V}}} %% particle-antiparticle space
+\newcommand{\pa}{{\mathcal{v}}} %% particle-antiparticle wave function
+\newcommand{\PNSpace}{{\mathcal{V}'}} %% positive-negative energy space
+\newcommand{\pn}{{\mathcal{v}'}} %% positive-negative energy wave function
+
+
+\newcommand{\Orb}{{\mathscr{O}}} %% Orbit for  Spin = Spin^0 U {\gamma_5}
+\newcommand{\OrbUp}{{\mathscr{O}_{m^2}^{\uparrow}}} %% Orbit for  Spin^0, p_0>0
+\newcommand{\OrbDown}{{\mathscr{O}_{m^2}^{\downarrow}}} %% Orbit for  Spin^0, p_0<0
+\newcommand{\OrbUpDown}{{\mathscr{O}_{m^2}^{\uparrow} \cup \mathscr{O}_{m^2}^{\downarrow}}} 
+
+\newcommand{\Fpa}{{\mathcal{F}_{(1)}}} %% Fock 1-(particle+antiparticle) space (Wigner representation for both par and antipar)
+%\newcommand{\Hpa}{{\mathcal{H}_{\mathbf{p}}}}  %% Complex-twisted particle+antiparticle space (Charge conj. anti-unitary)
+\newcommand{\VSpin}{{\mathcal{V}}} %% Carrier space for rep of \RR x Spin = \RR x (Spin^0 U {\gamma_5})
+\newcommand{\Hpn}{{\mathcal{H}_{\updownarrow}}} %% (Positive-negative energy)-twisted space space
+\newcommand{\HD}{{\mathcal{H}_{D}}} %% Dirac space (covariant space in momentum representation)
+\newcommand{\WSpinzero}{{\mathcal{H}_{\uparrow}}} %% Standard Wigner rep space for particle & antiparticles
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% SPACES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\Hgeneric}{{\mathcal{W}}}
+\newcommand{\fgeneric}[1][]{{w_{#1}}}
+\newcommand{\fgenericslashed}[1][]{{\slashed{w}_{#1}}}
+
+\newcommand{\Virr}{{W}}
+\newcommand{\Vred}{{V}}
+
+\newcommand{\wigner}{{\uparrow}}
+\newcommand{\Hwigner}{{\mathcal{W}_\wigner}}
+\newcommand{\fwigner}[1][]{{w_{#1}^\wigner}}
+
+
+\newcommand{\parant}{{\uparrow\oplus\uparrow}}
+\newcommand{\Hpa}{{\mathcal{W}_\parant}}
+\newcommand{\HpaExtended}{{\mathcal{V}_\parant}}
+\newcommand{\HpaExtendedCovariant}{{ {\vphantom{|}\mathcal{V}}^{\ElleUp}_{\parant} }}
+\newcommand{\fpa}[1][]{{\mathcal{v}_{#1}}}
+\newcommand{\fpaext}[1][]{{v_{#1}^\parant}}
+
+
+
+
+
+
+\newcommand{\FF}{{\uparrow\oplus\downarrow}} %%FF: field-function 
+\newcommand{\Hff}{\mathcal{K}_\FF} %% Wigner field-function space 
+\newcommand{\HffCovariant}{{ {\vphantom{|}\mathcal{K}}^{\ElleUpDown}_{\FF} }} %% Covariant field-function space
+\newcommand{\HffExtended}{{\mathcal{H}_\FF}} %% Extended Wigner field-function space 
+\newcommand{\HffExtendedCovariant}{{ {\vphantom{|}\mathcal{H}}^{\ElleUpDown}_{\FF} }}
+\newcommand{\fff}[1][]{{f_{#1}^\FF}}
+\newcommand{\fffext}[1][]{{f_{#1}^\FF}}
+% \newcommand{\Hcov}[1][]{{{\HffExtendedCovariant}}} %%
+\newcommand{\Hcov}[1][]{{{\mathcal{H}^{\textrm{cov}}_{#1}}}} %%
+\newcommand{\HPhi}{{\mathcal{H}_{\Phi}}} %%
+\newcommand{\HPi}{{\mathcal{H}_{\Pi}}} %%
+
+\newcommand{\fcov}[1][]{{{f_{#1}}}} %% argument of the fields
+\newcommand{\fST}[1][]{{{\varphi}}} %% space time test function
+\newcommand{\fzero}[1][]{{{F_{#1}}}} %% time-zero function
+
+
+%%%% ALIASES FOR SPACES:
+%%%% irr, red  ;   pa, ff  ;  wigner, cov
+%%%%
+%%%% \Hpa
+%%%% \HPA    \HPAcov
+%%%% \HFF    \HFFcov
+%%%% \Hff    \Hffcov
+%%%%
+\newcommand{\HPA}{\HpaExtended}
+\newcommand{\HFF}{\HffExtended}
+\newcommand{\HPAcov}{\HpaExtendedCovariant}
+\newcommand{\HFFcov}{\HffExtendedCovariant}
+\newcommand{\Hffcov}{\HffCovariant}
+
+%%%% FIELDS
+\newcommand{\fieldKG}{{\phi}}
+\newcommand{\fieldIrr}{{\psi}}
+\newcommand{\fieldCoord}{{\Phi}}
+\newcommand{\fieldMoment}{{\Pi}}
+
+\newcommand{\STfieldKG}{{\phi}}
+\newcommand{\STfieldReduced}{{\psi}}
+\newcommand{\STfieldCoord}[1][{0}]{{\Phi_{#1}}}
+\newcommand{\STfieldMoment}[1][{0}]{{\Pi_{#1}}}
+
+\let\div\relax
+\DeclareMathOperator{\div}{{\mathrm{div}}}
+
+
+%%% OLD
+
+\newcommand{\Hextended}{{\mathcal{V}_\Up}}
+\newcommand{\fextended}[1][]{{v_{#1}^\Up}}
+\newcommand{\HextendedDown}{{\mathcal{V}_\Down}}
+
+
+
+\newcommand{\total}{{\uparrow\oplus\downarrow}}
+\newcommand{\Htotal}{{\mathcal{H}_\total}}
+\newcommand{\ftotal}{{f^\total}}
+\newcommand{\ptotal}[1][]{{p_{#1}^\total}}
+
+\newcommand{\reduced}{{\updownarrow}}
+\newcommand{\Hreduced}{{\mathcal{H}_\reduced}}
+\newcommand{\freduced}{{f^\reduced}}
+
+\newcommand{\cov}{{\mathrm{cov}}}
+\newcommand{\Htotalcov}{{\mathcal{H}_\cov}}  %{{\mathcal{H}_\total^L}}
+\newcommand{\ftotalcov}[1][]{{{f_{#1}^\cov}}}
+
+\newcommand{\Hcoord}{{\mathcal{H}_\cov^\phi}}
+\newcommand{\fcoord}[1][]{{f_{#1}^\phi}}
+\newcommand{\Hmoment}{{\mathcal{H}_\cov^\pi}}
+\newcommand{\fmoment}[1][]{{f_{#1}^\pi}}
+
+\newcommand{\redcov}{}
+\newcommand{\Hredcov}{{\mathcal{K}_\redcov}}
+\newcommand{\fredcov}{{f^\reduced}}
+
+
+\newcommand{\Wightman}[1][]{{\mathrm{W}_{\!{#1}}}}
+\newcommand{\Wightmandual}{{\tilde{\mathrm{W}}}}
+\newcommand{\Wfunction}{{\mathcal{w}}}
+\newcommand{\Wfunctiondual}{{\tilde{\mathscr{W}}}}
+\newcommand{\Sfunction}{{\mathcal{S}}}
+
+
+
+
+\def\ccar#1#2{{{[ {#1} , {#2} ]}_\ostar}}
+\newcommand{\piUp}{{\varpi_\Up}}
+\newcommand{\piDown}{{\varpi_\Down}}
+\newcommand{\piUpDown}{{\varpi_{\Up\cup\Down}}}
+\newcommand{\restUpDown}{{{\rest_{\Up\cup\Down}}}}
+
+\DeclareMathOperator*{\Inv}{{\mathrm{Inv}}}
+
+
+\newcommand{\BoseFermiFock}[1][\!]{{\Gamma_{\!\ostar}{#1}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+\newcommand{\dirac}{{D}}
+\newcommand{\Hdirac}{{\mathcal{H}_\dirac}}
+\newcommand{\fdirac}{{f_\dirac}}
+
+\newcommand{\Hparticle}{{\mathcal{W}_\uparrow}}
+\newcommand{\fparticle}{{w_\uparrow}}
+\newcommand{\Hfield}{{\mathcal{H}}}
+\newcommand{\ffield}{{f}}
+\newcommand{\Sfield}{{\mathcal{S}}}
+
+\newcommand{\HwignerRed}{{\mathcal{V_\Up}}} %%% Wigner space for ``reducible particle''
+\newcommand{\HwignerRedDown}{{\mathcal{V_\Down}}} %%% Wigner space for ``reducible particle''
+\newcommand{\Hwignertotal}{{\mathcal{U}_\Up}} %%% Total space of reducible PAR & ANT
+\newcommand{\Hwignertotalcov}{{\mathcal{U}_\Up^{\ElleUp}}} %%% Total space of reducible PAR & ANT
+
+%\newcommand{\cov}{{\mathrm{cov}}}
+\newcommand{\Hwignercov}{{\tilde{\Hwigner}}}
+\newcommand{\fwignercov}{{\tilde{\fwigner}}}
+
+
+
+
+\newcommand{\Up}{{\uparrow}}
+\newcommand{\Down}{{\downarrow}}
+\newcommand{\pcircUp}{{\mathring{k}^\Up}}
+\newcommand{\pcircDown}{{\mathring{k}^\Down}}
+\newcommand{\pcirc}{{\mathring{k}}}
+
+% \DeclareMathOperator*{\SpinEta}{{\Spin(\varepsilon(\eta)\eta)}}
+% \DeclareMathOperator*{\SpinEtaZero}{{\Spin^0(\varepsilon(\eta)\eta)}}
+\DeclareMathOperator*{\SpinEta}{{\Spin}}
+\DeclareMathOperator*{\SpinEtazero}{{\Spin^0}}
+
+% \newcommand{\FF}{{\mathbb{V}}} %% Fermi Fock space
+% \newcommand{\FFfin}{{\mathbb{V}_{\textrm{fin}}}} %% Fermi Fock space
+% \newcommand{\ff}{{\mathbbm{v}}} %% element of the Fermi Fock space
+% \newcommand{\vac}{{\mathrm{Vac}}} %% vacuum state
+
+
+\usepackage{tikz}
+\usetikzlibrary{matrix,arrows.meta}
+\usepackage{amsmath}
+\DeclareMathOperator{\im}{im}
+
+
+%%%%%%%%%%%%%%%%%%%
+%%% For book document class:
+%\usepackage{times,lipsum}
+\usepackage[margin=1in]{geometry}
+% \usepackage[onehalfspacing]{setspace}
+\usepackage[]{setspace}
+
+\newcommand{\chapterabstract}[1]{
+  \begin{quote}
+    \singlespacing\small
+    \rule{14cm}{1pt}\\
+    {#1}
+    \vskip-4mm
+    \rule{14cm}{1pt}
+  \end{quote}}
+%%%%%%%%%%%%%%%%%% 
+
+
+%%%%
+%%%%%%%%[Notation Dirac Rosetta stone]
+
+%%%% taken from
+%%%% https://tex.stackexchange.com/questions/83509/hfill-in-math-mode
+\makeatletter
+\newcommand{\pushright}[1]{\ifmeasuring@#1\else\omit\hfill$\displaystyle#1$\fi\ignorespaces}
+\newcommand{\pushleft}[1]{\ifmeasuring@#1\else\omit$\displaystyle#1$\hfill\fi\ignorespaces}
+\makeatother
+
+
+
+% \title{Note on Free Fermions: the ultimate cheat sheet}
+%\title{Pedantic notation for free Dirac fields}
+\title{Deel learning, notes}
+\author{L. M. Borasi}
+%\email{borasi@iam.uni-bonn.de}
+%\affiliation{ 
+%Hausdorff Center of Mathematics \& Institute of Applied Mathematics,\\ University of Bonn, Germany
+%}%
+% 
+%\usepackage{xcolor}
+%\color{blue} 
+%\usepackage{eucal}
+\begin{document}
+\maketitle
+\begin{abstract}
+	Personal notes while reading the book~\cite{goodfellowDeepLearning2016}.
+\end{abstract}
+\tableofcontents
+
+\section{Back propagation}
+
+Let the output of a NN be a vector $f_{\text{out}}\in \mathcal H_{\text{out}}$ 
+where $\mathcal H_{\text{out}}$ is a vector space.
+We make $\mathcal H_{\text{out}}$ into a Hilbert space by defining a scalar product $\langle\cdot,\cdot\rangle$.
+The Hilbert norm is then $\|f\|\deq \sqrt{\langle f,f\rangle}$ 
+
+
+Consider $(e_i)_{i\in I}$ to be a Hilbert basis of $\mathcal H_{\text{out}}$.
+Then
+\begin{equation*}
+	\| f_{\text{out}} \|^2 = \sum_{i\in I} \langle f_{\text{out}}, e_i \rangle^2 = \sum_{i\in I}  [f_{\text{out}}]_i^2 
+	\quad v\in\mathcal H_{\text{out}}
+	,
+\end{equation*}
+where we have used the notation $[f]_i \deq \langle f, e_i\rangle$, $i\in I$, to denote the $i$-th component of $f$.
+
+
+
+Similarly let $\mathcal H_{\text{in}}$ the vector space of inputs.
+Moreover, let $\mathcal W$ be the vector space of weights. The graph of the network is an element $w\in\mathcal W$.
+
+We now consider the ``transition function'' $F:\mathcal H_{\text{in}} \times \mathcal W \rightarrow \mathcal H_{\text{out}}$.
+This function characterizes the NN completely, given the weights $w\in\mathcal W$ and the inputs $f_{\text{in}}$,
+$F(f_{\text{in}}, w)\in\mathcal H_{\text{out}}$ is the output returned by the NN.
+
+We consider the cost function
+\begin{equation*}
+	S(w) \deq \sum_{f_{\text{in}}\in\mathcal H_{\text{in}}} \| F(f_{\text{in}}, w) - r(f_{\text{in}}) \|^2,
+	\quad w\in\mathcal W
+	.
+\end{equation*}
+Here $r:\mathcal H_{\text{in}}\rightarrow\mathcal H_{\text{out}}$ is the ``reference function'',
+that is a function that returns the ``reference output'' for each input (in principle we could have absorbed $r$ into $F$,
+but for clarity we keep them separated).
+
+For a fixed $w\in\mathcal W$, consider $\nabla S(w)$ as an element of $\mathcal W$.
+Consider the expansion
+$$
+S(w-\epsilon\nabla S(w)) = S(w) - \epsilon {\|\nabla S(w)\|}^2 + R(w,\epsilon)
+\quad u\in U\subset\mathcal W,\quad 0<\epsilon<1
+.
+$$
+
+Let
+$U \subset \mathcal W$, and $0<\epsilon<1$, such that  $R(w, \epsilon) \le C(U) \epsilon^2$, $w\in U$.
+Then
+\begin{align*}
+	&S(w - \epsilon \nabla S(w) ) = S(w) - \epsilon {\| \nabla S(w) \|}^2  + \epsilon^2 C(U)\\
+	&S(w - \epsilon \nabla S(w) )  - S(w)  = -\epsilon {\| \nabla S(w) \|}^2+ \epsilon^2 C(U)\\
+	&\qquad \le -\epsilon  {\| \nabla S(w) \|}^2 + \epsilon^2 |C(U)|
+	.
+\end{align*}
+Assume $\|\nabla S(w)\|_{\mathcal W}\| \ne 0$, then
+let $\epsilon$ such that $\epsilon|C(U)| < \frac12 {\|\nabla S(w)\|}_{\mathcal W}$.
+Then 
+\begin{equation*}
+	S(w - \epsilon \nabla S(w) )  - S(w) < -\frac{\epsilon}{2} {\|\nabla S(w)\|}_{\mathcal W} < 0
+		.
+\end{equation*}
+Hence we have
+\begin{theorem}
+	For $U\subset\mathcal W$ compact, and $w\in U$ fixed,
+	there exists an $\epsilon>0$ such that
+	$$
+	S(w-\epsilon\nabla S(w)) \le S(w)
+	.
+	$$
+	and if $\nabla S(w)\ne 0$, then $\le$ can be replaced by $<$. 
+\end{theorem}
+
+\begin{example}
+Let $\varphi$ be an activation function.
+Consider
+$$
+F(f_{\text{in}},w) \deq \varphi( w^{(2)} \varphi( w^{(1)} \varphi( w^{(0)} f_{\text{in}} + b^{(0)} ) + b^{(1)} ) + b^{(2)} )
+$$
+and
+$$
+S(w) \deq \|F(f_{\text{in}},w)\|^2
+.
+$$
+
+Now, we compute step by step the derivatives:
+$$
+\nabla S(w) = \nabla\|F(w)\|^2 = \partial_j  F(w)^2 = 2\partial_j F(w)
+.
+$$
+Let 
+\begin{align*}
+	x^{(1)}(w,b) &\deq w^{(0)} f_{\text{in}} + b^{(0)}\\
+	x^{(2)}(w,b) &\deq w^{(1)} \varphi(x^{(1)}) + b^{(1)}\\
+	x^{(3)}(w,b) &\deq w^{(2)} \varphi(x^{(2)}) + b^{(2)}
+	.
+\end{align*}
+We write this compactly as follows
+\begin{align*}
+	x^{(L+1)} &\deq w^{(L)} \varphi_{L}( x^{(L)} ) + b^{(L)},
+	\quad L\in\{0,1,2\}
+	,
+\end{align*}
+where $\varphi_0(x) \equiv 1$, $\varphi_{L-1} \equiv \varphi$ for $L>1$. 
+
+
+
+
+
+\begin{align*}
+	\partial_{w^{(2)}} F(f_{\text{in}}, w)
+	&= \partial_{w^{(2)}} \varphi(x^{(3)} )\\
+	&= \varphi'(x^{(3)} ) \partial_{w^{(2)}} x^{(3)} \\
+	&= \varphi'( x^{(2)} ) \varphi( x^{(1)} )
+	.
+\end{align*}
+\begin{align*}
+	\partial_{w^{(1)}} F(f_{\text{in}}, w)
+	&= \partial_{w^{(1)}}  \varphi( x^{(3)} ) \\
+	&= \varphi'( x^{(3)} ) \partial_{w^{(1)}} x^{(3)} \\
+	&= \varphi'( x^{(3)} ) \frac{\partial x^{(3)} }{ \partial x^{(2)} } \partial_{w^{(1)}} x^{(2)} \\
+	&=  \varphi'( x^{(3)} ) w^{(2)} \varphi'( x^{(2)} ) \varphi( x^{(1)} ) 
+	.
+\end{align*}
+\begin{align*}
+	\partial_{w^{(0)}} F(f_{\text{in}}, w)
+	&= \varphi'( x^{(3)} ) \partial_{w^{(0)}} x^{(3)} \\
+	&= \varphi'( x^{(3)} ) \frac{\partial x^{(3)}}{\partial x^{(2)}} \partial_{w^{(0)}} x^{(2)} \\
+	&= \varphi'( x^{(3)} ) \frac{\partial x^{(3)}}{\partial x^{(2)}} 
+			\frac{ \partial x^{(2)} } {\partial x^{(1)} } \partial_{w^{(0)}} x^{(1)} \\
+	&= \varphi'( x^{(3)} ) w^{(2)} \varphi'( x^{(2)} ) w^{(1)} \varphi'(x^{(1)} ) f_{\text{in}}
+	.
+\end{align*}
+We write this compactly as follows:
+\begin{align*}
+	\partial_{w^{(L)}} F( f_{\text{in}}, w )
+			&= \prod_{\ell=L}^{3} w^{(\ell)} \varphi'_{\ell}( x^{(\ell)} )
+\end{align*}
+
+
+
+
+
+
+
+\end{example}
+
+% \newpage
+% \subsection*{}
+
+% \newpage
+
+%\nocite{*}
+%\bibliography{aipsamp}% Produces the bibliography via BibTeX.
+%\bibliographystyle{plain}%  
+\bibliographystyle{amsalpha}%   
+\bibliography{ML}% 
+     
+\end{document}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
+
