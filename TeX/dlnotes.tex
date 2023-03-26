@@ -1,5 +1,5 @@
 %% Next line for the spell checker to disable warnings about $f(x)^2$ vs $f{(x)}^2$.
-% chktex-file 3 
+% chktex-file asdfqweasdfqwe3  
 %%%
  
 \documentclass[10pt, a4paper]{article}
@@ -11,9 +11,9 @@
 %%%   M-x reftex-renumber-simple-labels 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% Standard packages
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % amsmath,amssymb,    
 
 %\usepackage{graphicx}% Include figure files   
@@ -762,27 +762,43 @@ Hence we have
 \end{theorem}
 
 \begin{example}
-Let $\varphi$ be an activation function.
-Consider
-$$
-F(f_{\text{in}},w) \deq \varphi( w^{(2)} \varphi( w^{(1)} \varphi( w^{(0)} f_{\text{in}} + b^{(0)} ) + b^{(1)} ) + b^{(2)} )
-$$
-and
-$$
-S(w) \deq \|F(f_{\text{in}},w)\|^2
-.
-$$
+  We consider a NN with $N=1$, i.e. one neuron per layer, and $L$ layers.
+  Let $\varphi^\ell$ be the activation function of the neuron in the $\ell$-th layer, $\ell\in\{1,\dots, L\}$.
+  It is convenient, to write down more compact formulas, to define
+  $$
+  \varphi^0(x) \deq x,\quad x\in \RR
+  .
+  $$
+  We define recursively the transition function
+  $F:\mathcal V\times \mathcal  H_{\text{in}}\rightarrow \mathcal H_{\text{out}}$:
+  \begin{align*}
+    F(v,f) &\deq x^{L+1} , \\
+    x^{\ell+1} &= b^\ell + w^\ell \varphi^\ell ( x^\ell ),\quad \ell \in \{ 1,\dots , L\} , \\
+    x^{0} &= f^{in},
+  \end{align*}
+  where $v=(w,b)\in\mathcal V$.
+  For example for $L=2$ we have:
+  $$
+  F(f_{\text{in}},w) \deq  w^{(2)} \varphi( w^{(1)} \varphi( w^{(0)} f_{\text{in}} + b^{(0)} ) + b^{(1)} ) + b^{(2)} 
+  .
+  $$
 
-Now, we compute step by step the derivatives:
-$$
-\nabla S(w) = \nabla\|F(w)\|^2 = \partial_j  F(w)^2 = 2\partial_j F(w)
-.
+  We define the cost function to be $S:\mathcal V\times \rightarrow\RR$.
+  $$
+  S(v) \deq \|F(f_{\text{in}},v) - F_{\infty}(f_{\text{in}} ) \|^2
+  .
+  $$
+
+  Now, we compute step by step the derivatives:
+  $$
+  \nabla S(w) = \nabla\|F(w)\|^2 = \partial_j  F(w)^2 = 2\partial_j F(w)
+  .
 $$
 Let 
 \begin{align*}
 	x^{(1)}(w,b) &\deq w^{(0)} f_{\text{in}} + b^{(0)}\\
 	x^{(2)}(w,b) &\deq w^{(1)} \varphi(x^{(1)}) + b^{(1)}\\
-	x^{(3)}(w,b) &\deq w^{(2)} \varphi(x^{(2)}) + b^{(2)}
+	x^{(3)}(w,b) &\deq w^{(2)} \varphi(x^{(2)}) + b^{(2)} = F(f_{\text{in}}, w)
 	.
 \end{align*}
 We write this compactly as follows
@@ -799,34 +815,130 @@ where $\varphi_0(x) \equiv 1$, $\varphi_{L-1} \equiv \varphi$ for $L>1$.
 
 \begin{align*}
 	\partial_{w^{(2)}} F(f_{\text{in}}, w)
-	&= \partial_{w^{(2)}} \varphi(x^{(3)} )\\
-	&= \varphi'(x^{(3)} ) \partial_{w^{(2)}} x^{(3)} \\
-	&= \varphi'( x^{(2)} ) \varphi( x^{(1)} )
+ 	&= \partial_{w^{(2)}} x^{(3)} \\
+	&=  \partial_{w^{(2)}} x^{(3)} \\
+	&=  \varphi( x^{(1)} )
 	.
 \end{align*}
+\begin{align*}
+	\partial_{b^{(2)}} F(f_{\text{in}}, w)
+	&= 1
+	.
+\end{align*}
+
 \begin{align*}
 	\partial_{w^{(1)}} F(f_{\text{in}}, w)
-	&= \partial_{w^{(1)}}  \varphi( x^{(3)} ) \\
-	&= \varphi'( x^{(3)} ) \partial_{w^{(1)}} x^{(3)} \\
-	&= \varphi'( x^{(3)} ) \frac{\partial x^{(3)} }{ \partial x^{(2)} } \partial_{w^{(1)}} x^{(2)} \\
-	&=  \varphi'( x^{(3)} ) w^{(2)} \varphi'( x^{(2)} ) \varphi( x^{(1)} ) 
+	&= \partial_{w^{(1)}}   x^{(3)}  \\
+	&= \partial_{w^{(1)}} x^{(3)} \\
+	&= \frac{\partial x^{(3)} }{ \partial x^{(2)} } \partial_{w^{(1)}} x^{(2)} \\
+	&=  w^{(2)} \varphi'( x^{(2)} ) \varphi( x^{(1)} ) 
 	.
 \end{align*}
 \begin{align*}
+	\partial_{b^{(1)}} F(f_{\text{in}}, w)
+	&= 
+	\frac{\partial x^{(3)}}{\partial x^{(2)}} \partial_{b^{(1)}} x^{(2)}\\
+	&=
+	w^{(2)}\varphi'(x^{(2)}) 
+	.
+\end{align*}
+
+\begin{align*}
 	\partial_{w^{(0)}} F(f_{\text{in}}, w)
-	&= \varphi'( x^{(3)} ) \partial_{w^{(0)}} x^{(3)} \\
-	&= \varphi'( x^{(3)} ) \frac{\partial x^{(3)}}{\partial x^{(2)}} \partial_{w^{(0)}} x^{(2)} \\
-	&= \varphi'( x^{(3)} ) \frac{\partial x^{(3)}}{\partial x^{(2)}} 
-			\frac{ \partial x^{(2)} } {\partial x^{(1)} } \partial_{w^{(0)}} x^{(1)} \\
-	&= \varphi'( x^{(3)} ) w^{(2)} \varphi'( x^{(2)} ) w^{(1)} \varphi'(x^{(1)} ) f_{\text{in}}
+	&= \partial_{w^{(0)}} x^{(3)} \\
+	&= \frac{\partial x^{(3)}}{\partial x^{(2)}} \partial_{w^{(0)}} x^{(2)} \\
+	&= \frac{\partial x^{(3)}}{\partial x^{(2)}} \frac{ \partial x^{(2)} } {\partial x^{(1)} } \partial_{w^{(0)}} x^{(1)} \\
+	&= w^{(2)} \varphi'( x^{(2)} ) w^{(1)} \varphi'(x^{(1)} ) f_{\text{in}}
+	.
+\end{align*}
+\begin{align*}
+	\partial_{b^{(0)}} F(f_{\text{in}}, w)
+	&= \partial_{b^{(0)}} x^{(3)} \\
+	&= \frac{\partial x^{(3)}}{\partial x^{(2)}} \partial_{b^{(0)}} x^{(2)} \\
+	&= \frac{\partial x^{(3)}}{\partial x^{(2)}} \frac{ \partial x^{(2)} } {\partial x^{(1)} } \partial_{b^{(0)}} x^{(1)} \\
+	&= w^{(2)} \varphi'( x^{(2)} ) w^{(1)} \varphi'(x^{(1)}) 
 	.
 \end{align*}
 We write this compactly as follows:
 \begin{align*}
+	\partial_{b^{(L)}} F( f_{\text{in}}, w )
+			&= \prod_{\ell=L+1}^{3-1} w^{(\ell)} \varphi'_{\ell}( x^{(\ell)} ), \\ 
 	\partial_{w^{(L)}} F( f_{\text{in}}, w )
-			&= \prod_{\ell=L}^{3} w^{(\ell)} \varphi'_{\ell}( x^{(\ell)} )
+			&= \big(\prod_{\ell=L+1}^{3-1} w^{(\ell)} \varphi'_{\ell}( x^{(\ell)} ) \big) \varphi_L(x^{(L)})
+	,
+\end{align*}
+where we have set for convenience
+\begin{align*} 
+	x^{(0)} &= 0 ,\\
+	\varphi_{0}(x) &\equiv 1
+	.
+\end{align*}
+asdfzxcv
+\end{example}
+
+
+\begin{example}
+Next we consider the case with $N$ total neurons per layer.
+For simplicitly we let
+$L=2$ as before.
+
+We set $v$ to denote the pair $(b,w)$,
+$v \deq (b,w)$,
+and we define:
+\begin{align*}
+	[F(f_{\text{in}}, v)]_{j} 
+	&\deq b^{(L)}_j  +  w^{(L)}_{jk} \varphi^{(L)}_k( x^{(L)}_k ) \\
+	&= b^{(2)}_j + w^{(2)}_{jk_2} \varphi^{(2)}_{k_2}( x^{(2)}_{k_2} ) \\
+	&= b^{(2)}_j + w^{(2)}_{jk_2} \varphi^{(2)}_{k_2}( b^{(1)}_{k_2} + w^{(1)}_{k_2 k_1} \varphi^{(1)}_{k_1}( x^{(1)}_{k_1} )  ) \\
+	&= b^{(2)}_j + w^{(2)}_{jk_2} \varphi^{(2)}_{k_2}( b^{(1)}_{k_2} + w^{(1)}_{k_2 k_1} \varphi^{(1)}_{k_1}( 
+									b^{(0)}_{k_1} + w^{(0)}_{k_1 k_0} f^{\text{in}}_{k_0}   ) \\
+\end{align*}
+This becomes recursively defined as follows:
+\begin{align*}
+	F_j(f^{\text{in}}, v)
+	&\deq x^{(L+1)}_j\\
+	x^{(\ell+1)}_{j} &\deq b^{(\ell)}_j + \sum_{k=1}^N w^{(\ell)}_{jk}\varphi^{(\ell)}_k ( x^{(\ell)}_k ),
+		\quad \ell\in \{0,\dots, L\},\\
+	x^{(0)}_j &\deq f^{\text{in}}_j
+	,
+\end{align*}
+with $j\in\{1,\dots,N\}$
+and
+where $\varphi^{(\ell)}_k$, $k\in\{1,\dots,N\}$, $\ell\in\{0,\dots,L\}$, 
+is the activation function of the $k$-th neuron in the $\ell$-th layer and we set
+$$
+\varphi^{(0)}_k ( f^{\text{in}}_k ) \equiv f^{\text{in}}_k 
+,
+$$
+that is the activation function of the inputs is the identity function. 
+
+We now compute the derivatives step by step.
+First we have
+\begin{align*}
+	\partial_{w^{(\ell)}_{jk} } x^{(\ell+1)}_{j'}
+	&= 
+	\sum_{k'} \delta_{jj'}\delta_{kk'} \varphi^{(\ell)}_{k'}(x^{(\ell)}_{k'} ) \\
+	&=
+	\delta_{jj'} \varphi^{(\ell)}_k ( x^{(\ell)}_k )
+	.
+\end{align*}
+Second we have
+\begin{align*}
+	\partial_{x^{(\ell)}_j } x^{(\ell+1)}_k = w^{(\ell)}_{jk} 
 \end{align*}
 
+Now let us compute
+\begin{align*}
+	\partial_{w^{(\ell-h)}_{jk}} x^{(\ell+1)}_{j'}
+	&= 
+	\sum_{k_{\ell},\dots,k_{\ell-h+1}}
+		\frac{\partial x^{(\ell+1)}_{j'} }{ \partial x^{(\ell)}_{k_\ell} }
+		\frac{\partial x^{(\ell)}_{k_\ell} }{ \partial x^{(\ell-1)}_{k_{\ell-1}} } 
+			\cdots \frac{\partial x^{(\ell-h+2)}_{k_{\ell-h+2}} }{ \partial x^{(\ell-h+1)}_{k_{\ell-h+1}} } 
+				\partial_{w^{(\ell-h)}_{jk} } x^{(\ell-h+1)}_{k_{\ell-h+1}} \\
+	&=
+	[ w^{(\ell)} w^{(\ell-1)}\cdots w^{(\ell-h+1)} ]_{j' j} \delta_{jj'} \varphi^{(\ell-h)}_k( x^{(\ell-h)}_k )
+\end{align*}
 
 
 
@@ -834,6 +946,13 @@ We write this compactly as follows:
 
 
 \end{example}
+
+
+
+
+
+
+
 
 % \newpage
 % \subsection*{}
@@ -853,4 +972,6 @@ We write this compactly as follows:
 %%% mode: latex
 %%% TeX-master: t
 %%% End:
+
+
 
