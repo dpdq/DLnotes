@@ -371,6 +371,9 @@
 \newcommand*{\pDown}{{p^\Down}}
 \newcommand*{\pST}{{\mathcal p}}
 
+\newcommand*{\fin}{{f^{\text{in}}}}
+\newcommand*{\SET}[1]{{\{ 0, \dots, #1 - 1 \}}}
+
 
 % completed direct sum and product
 \DeclareMathOperator*{\Hoplus}{\widehat\oplus}
@@ -417,11 +420,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-%\usepackage{MnSymbol} %% I need \ostar
+\usepackage{MnSymbol} %% I need \ostar
 %\newcommand{\ostar}{{{\textcircled{$\star$}}}}
 %\usepackage{wasysym}
 %\newcommand{\ostar}{{\APLlog}}
-\newcommand{\ostar}{{\circledast}}
+%\newcommand{\ostar}{{\circledast}}
 
 
 % \newcommand{\PPpar}{{\mathbb P_{\mathrm{par}}}}
@@ -712,7 +715,7 @@ where we have used the notation $[f]_i \deq \langle f, e_i\rangle$, $i\in I$, to
 Similarly let $\mathcal H_{\text{in}}$ the vector space of inputs.
 Moreover, let $\mathcal W$ be the vector space of weights. The graph of the network is an element $w\in\mathcal W$.
 
-We now consider the ``transition function'' $F:\mathcal H_{\text{in}} \times \mathcal W \rightarrow \mathcal H_{\text{out}}$.
+We now consider the ``characteristic function''  $F:\mathcal H_{\text{in}} \times \mathcal W \rightarrow \mathcal H_{\text{out}}$.
 This function characterizes the NN completely, given the weights $w\in\mathcal W$ and the inputs $f_{\text{in}}$,
 $F(f_{\text{in}}, w)\in\mathcal H_{\text{out}}$ is the output returned by the NN.
 
@@ -762,183 +765,242 @@ Hence we have
 \end{theorem}
 
 \begin{example}
-  We consider a NN with $N=1$, i.e. one neuron per layer, and $L$ layers.
-  Let $\varphi^\ell$ be the activation function of the neuron in the $\ell$-th layer, $\ell\in\{1,\dots, L\}$.
+  We consider a FNN with $N\in\NN$ neurons per layer and $L\in\NN$ layers.
+  Let $\varphi^\ell:\RR^N\rightarrow\RR^N$ be the activation function of the neuron in the $\ell$-th layer, $\ell\in\{1,\dots, L\}$.
   It is convenient, to write down more compact formulas, to define
   $$
-  \varphi^0(x) \deq x,\quad x\in \RR
+  \varphi^0(x) \deq x,\quad x\in \RR^N
   .
   $$
-  We define recursively the transition function
+  We define recursively the FNN characteristic  function
   $F:\mathcal V\times \mathcal  H_{\text{in}}\rightarrow \mathcal H_{\text{out}}$:
-  \begin{align*}
-    F(v,f) &\deq x^{L+1} , \\
-    x^{\ell+1} &= b^\ell + w^\ell \varphi^\ell ( x^\ell ),\quad \ell \in \{ 1,\dots , L\} , \\
-    x^{0} &= f^{in},
-  \end{align*}
+  \begin{equation}
+    \label{eq:3}
+    \begin{aligned}
+      F(V,f) &\deq X^{L+1} , \\
+      X^{\ell+1} &\deq b^\ell + w^\ell \varphi^\ell ( X^\ell ),\quad \ell \in \{ 1,\dots , L\} , \\
+      X^{0} &= f^{in},
+    \end{aligned}
+  \end{equation}
   where $v=(w,b)\in\mathcal V$.
-  For example for $L=2$ we have:
+  For example for $N=1$ and $L=2$ we have:
   $$
-  F(f_{\text{in}},w) \deq  w^{(2)} \varphi( w^{(1)} \varphi( w^{(0)} f_{\text{in}} + b^{(0)} ) + b^{(1)} ) + b^{(2)} 
+  F(f_{\text{in}},v) \deq  w^{(2)} \varphi( w^{(1)} \varphi( w^{(0)} f_{\text{in}} + b^{(0)} ) + b^{(1)} ) + b^{(2)} 
   .
   $$
 
-  We define the cost function to be $S:\mathcal V\times \rightarrow\RR$.
+  We define the cost function to be $S:\mathcal V \rightarrow\RR$.
   $$
-  S(v) \deq \|F(f_{\text{in}},v) - F_{\infty}(f_{\text{in}} ) \|^2
+  S(v) \deq \sum_{\fin\in\mathcal H^{\text{in}}} \|F(f_{\text{in}},v) - F_{\infty}(f_{\text{in}} ) \|^2
   .
   $$
 
+  We want to compute the gradient of $F(V,\fin) $. One could work with the notation of~e\eqref{eq:3},
+  then the result would still need some interpretation before it could be implemented rigorously in a programming language.
+  Therefore we introduce a more rigorous notation.
+
+  Let $\mathbb V$ be the space of weights. 
+  We consider the ``filtration'' over $\ell\in\SET{L}$ of the weights,
+  that is we consider $\mathbb V = \mathcal V_0\oplus\mathcal V_1\oplus \cdots\oplus\mathcal V_L$ where
+  $\mathcal V_\ell$, $\ell\in\SET{L}$, denotes the space of the weights which contribute to the layer $\ell$.
+  All the $\mathcal V_\ell$, $\ell\in\SET{L}$, can be taken isomorphic.
+
+  Similarly we can think of $L$ identical spaces $\mathcal H_0,\dots\mathcal H_{L-1}$,
+  where $\mathcal H_\ell$
+  describe the space of inputs of the $\ell$-th layer, , $\ell\in\SET{L}$. 
+
+  
+  Moreover we define ``filtered'' transition functions, i.e. we define the following functions
+  \begin{align*}
+    X^{\ell+1}_{v}(x) &\deq b + w\varphi^\ell(x),
+                            \quad v=(b,w)\in\mathcal V^\ell,
+                            \quad x\in\mathcal H^\ell
+                            \quad \ell\in \{0,\dots, L-1\}
+                            .
+  \end{align*}
+  Then we extend this definition to get a transition function $F^{\ell+h,\ell}$ from the layer $\ell$ to the layer $\ell+h$:
+  \begin{align*}
+    F^{\ell+h,\ell}(V, x) &\deq X^{\ell+h}_{v^{\ell+h-1}}  (\dots  X^{\ell+2}_{v^{\ell+1}} ( X^{\ell+1} _{v^{\ell}} (x) ) \dots ) \\
+                       &\equiv (X^{\ell+h}_{v^{\ell+h-1}} \circ \dots \circ X^{\ell+2}_{v^{\ell+1}}  \circ X^{\ell+1}_{v^{\ell}}  )(x)
+                         ,
+  \end{align*}
+  where
+  \begin{align*}
+    V = (v^{\ell+h-1},\dots,v^{\ell+1}, v^{\ell} ) , \quad x\in\mathcal H^\ell
+    ,
+  \end{align*}
+  and  where $\circ$ denotes composition of functions.
+  By definition we have
+  \begin{align*}
+    F^{\ell+1,\ell} \equiv X^{\ell+1}
+    .
+  \end{align*}
+  Note that $F^{\ell+h,\ell}$ is nothing but $x^{\ell+h}$, in our previous notation, seen as \textit{a function of} $x^{\ell}$.
+  In this sense the $F^{\ell',\ell'}$, $\ell'>\ell$, are just a more rigorous notation for the $x^{\ell'}$ where we explicitly consider $x^{\ell'}$
+  as a function with  a specific domain.
+  We can rewrite the NN characteristic function as follows
+  \begin{align*}
+    F(V,f^{\text{in}}) &= F^{L,0}(V, f^{\text{in}})  = X^{L}_{v^L}(  F^{L-1,0}(V\rest_{L-1},  f^{\text{in}} ) ), \\
+    X^{\ell+1}_{v^\ell}( F^{\ell,0}(V\rest_{L-1}, f^{\text{in}} ) )
+                       &= b^\ell + w^\ell \varphi^\ell( F^{\ell,0}(V\rest_{L-1}, f^{\text{in}}) )\\
+                       &=  b^\ell + w^\ell  \varphi^\ell ( X^{\ell}_{v^{\ell-1}} ( F^{\ell-1,0}(V\rest_{\ell-2}, f^{\text{in}})) ),
+                         \quad \ell\in\{0,\dots, L\} 
+                         .
+  \end{align*}
+
+  Strong of this (perhaps a bit over complicated..) notation we now compute the gradient $\nabla F$.
+  By $\nabla F$ we mean the gradient (i.e. Jacobian matrix) with respect to the weights $V\in\mathbb V$:
+  \begin{align*}
+    [\nabla F (V, \fin) ]_{jk} \deq \frac{\partial}{\partial V_j} F_k( V,\fin)
+    .
+  \end{align*}
+  It is convenient to introduce a notation also for the gradient with respect to the inputs.
+  Given a ``filtered transition function'' $F^{\ell',\ell}(V,x)$, we denote by $DF^{\ell',\ell}$
+  the gradient with respect to the input $x$:
+  \begin{align*}
+    [DF^{\ell',\ell}(V,x)]_{nm} \deq \frac{\partial}{\partial x_n} F^{\ell',\ell}_m(V,x)
+    .
+  \end{align*}
+
+  
+
+
+  
   Now, we compute step by step the derivatives:
-  $$
-  \nabla S(w) = \nabla\|F(w)\|^2 = \partial_j  F(w)^2 = 2\partial_j F(w)
-  .
-$$
-Let 
-\begin{align*}
-	x^{(1)}(w,b) &\deq w^{(0)} f_{\text{in}} + b^{(0)}\\
-	x^{(2)}(w,b) &\deq w^{(1)} \varphi(x^{(1)}) + b^{(1)}\\
-	x^{(3)}(w,b) &\deq w^{(2)} \varphi(x^{(2)}) + b^{(2)} = F(f_{\text{in}}, w)
-	.
-\end{align*}
-We write this compactly as follows
-\begin{align*}
-	x^{(L+1)} &\deq w^{(L)} \varphi_{L}( x^{(L)} ) + b^{(L)},
-	\quad L\in\{0,1,2\}
-	,
-\end{align*}
-where $\varphi_0(x) \equiv 1$, $\varphi_{L-1} \equiv \varphi$ for $L>1$. 
+  First we have:
+
+  \more{Note that there isn't a good notation for this.. one could write
+    $\nabla \langle F(v)-F_\infty, F(v)-F_\infty \rangle = \langle 2(F(v)-F_\infty), \nabla F(v) \rangle$
+    but this is not very good notation.. A correct notation would be:
+    $ (\nabla f(x)){[h]} $ denotes the gradient in the direction $h$, then
+    $\nabla (\langle F(x), F(x)\rangle){[h]} = \langle 2F(x), (\nabla F(x)){[h]}\rangle$.
+  }
+  
+  \begin{align*}
+    [\nabla S(v)]_j
+    &= \frac{\partial}{\partial v_j} S(v) \\
+    &= \sum_{\fin\in\mathcal H^{\text{in}}} \frac{\partial}{\partial v_j} \sum_k (F_k(V,\fin) - [F_\infty]_k  )^2 \\
+    &= \sum_{\fin\in\mathcal H^{\text{in}}} \sum_k 2(F_k(V,\fin) - [F_\infty]_k)\frac{\partial}{\partial v_j} F_k(V,\fin)
+    .
+  \end{align*}
+  We compactly denote this as follows
+  \begin{align*}
+    \nabla S(V)
+    &= \sum_{\fin\in\mathcal H^{\text{in}}} \llangle 2(F(V,\fin) - F_\infty) , \nabla F(V) \rrangle,
+      V\in\mathbb V
+      .
+  \end{align*}
+
+  
+  We now want to compute $\nabla F$.
+  Using the ``filtration'' over $\ell$ we can consider the gradient $\nabla^\ell F$ only considering the weights that
+  contribute the layer $\ell$.
+  Explicitly we have
+  \begin{align*}
+    [\nabla^\ell F(V,\fin)]_{nm}
+    &\deq  \frac{\partial}{\partial v^\ell_n} F_m(V,\fin),
+      \quad V=(v^{L-1},\dots, v^\ell,\dots, v^0)
+      .
+  \end{align*}
+  We use the chain rule in the following form (cf.~ \cite[(1.4) p. 23, and (2.3) Theorem]{boothbyIntroductionDifferentiableManifolds2003}).
+  Given two functions $F:\RR^\mu\rightarrow\RR^\nu$, $G:\RR^\nu\rightarrow \RR^\rho $, $\mu,\nu,\rho\in\NN$, we let
+  $H\deq G\circ F:\RR^\mu\rightarrow\RR^\rho$.
+  Then we have
+  \begin{equation}
+    \label{eq:5}
+    (DH)( a ) = (DG)( F(a) ) (DF)(a), \quad a\in\RR^\nu
+    ,
+  \end{equation}
+  where $DF$ and $DG$ represent the gradients of $F$ and $G$ 
+  and
+  where on the right-hand side we have the matrix product of the matrix $(DG)( F(x) )$ with the matrix $(DF)(x)$.
+  In our case we distinguish between the gradient with respect to the weights (which we denote by $\nabla$)
+  and the one with respect to the weights (which we denote by $\mathtt D$).
+  The straight forward specialization of this formula to our case reeds:
+  \begin{equation}\label{eq:4}
+    \begin{aligned}
+      \nabla^{\ell-1} F(V,\fin)
+      &= \nabla^{\ell-1} F^{L,\ell+1}([V]_{L,\ell}, F^{\ell,0}([V]_{\ell-1,0} , \fin ) ) \\
+      &= (\mathtt D F^{L+1,\ell+1})([V]_{L,\ell}, F^{\ell,0}([V]_{\ell,0}, \fin ) ) (\nabla^{\ell-1}  F^{\ell,0})([V]_{\ell-1,0} , \fin )
+        ,
+    \end{aligned}
+  \end{equation}
+  where       
+  \begin{align*}
+    V = (v^{L-1},\dots, v^0),\quad [V]_{L-1,\ell} =(v^{L-1},\dots, v^{\ell}),\quad [V]_{\ell-1,0}=(v^{\ell-1},v^0)
+    .
+  \end{align*}
+  
+  \more{This is a complicated way to write:
+    \begin{align*}
+      \frac{\partial F_k(v)}{\partial v^\ell} 
+      &= \frac{\partial x^L}{\partial v^\ell} \\
+      &= \frac{\partial x^L}{\partial x^{\ell+1} }\frac{\partial x^{\ell+1}}{\partial v^\ell}
+        .
+    \end{align*}
+    In this way we reduce the problem of computing the gradient $\nabla F$ to the problem of
+    computing the partial derivatives $\partial x^L / \partial x^{\ell+1}$.
+    These derivatives can be computed recursively (applying again the chain rule). This is the origin of the name \textit{back-propagation}.
+    Indeed,  we have
+    \begin{equation}\label{eq:1}
+      \begin{aligned}
+        \frac{\partial x^{L+1}}{\partial x^{\ell+1}}
+        &= \frac{\partial x^{L+1}}{\partial x^{\ell+2}}\frac{\partial x^{\ell+1}}{\partial x^{\ell+1}}
+          .
+      \end{aligned}
+    \end{equation}
+    We rewrite this in terms of the more rigorous notation employing the functions $F^{\ell',\ell}$.
+  }
+
+  In formula~\eqref{eq:4} the term $ (\nabla^{\ell-1}  F^{\ell,0})([V]_{\ell-1,0} , \fin )$ can already be written down explicitly.
+  To write it down we recall that the weight $v^\ell$ is composed of two parameters:  $v^\ell=(b^\ell,w^\ell)$.
+  Hence we denote by $\nabla^\ell_b$, respectively $\nabla^\ell_w$, the gradient with respect to $b^\ell$, respectively $w^\ell$.
+  We obtain:
+  \begin{equation*}
+    \begin{aligned}
+      (\nabla^{\ell-1}_b  F^{\ell,0})([V]_{\ell-1,0} , \fin ) &= \id,\\
+      (\nabla^{\ell-1}_w  F^{\ell,0})([V]_{\ell-1,0} , \fin ) &= \varphi^{\ell-1}(  F^{\ell-1,0}([V]_{\ell-2,0}, \fin  )
+                                                                .
+    \end{aligned}
+  \end{equation*}
+  The term $(D F^{L+1,\ell+1})([V]_{L,\ell}, F^{\ell,0}([V]_{\ell,0}, \fin ) )$, on the right-hand side of~\eqref{eq:4},
+  can be computed by applying again the chain rule~\eqref{eq:5}.
+  In this way we get the following recursive relation which is the origin of the name \textit{back-propagation}:
+  \begin{equation}\label{eq:6}
+    \begin{aligned}
+      (D F^{L+1,\ell+1})([V]_{L,\ell}, F^{\ell,0}([V]_{\ell,0}, \fin ) )
+      &= (D F^{L+1,\ell+2})([V]_{L,\ell+1}, X^{\ell+1}_{v^{\ell+1}} ( F^{\ell,0}([V]_{\ell,0}, \fin ) ) )\mathbf\cdot\\
+      & \hspace{5cm}\mathbf\cdot  (DX^{\ell+1}_{v^{\ell+1}}) ( F^{\ell,0}([V]_{\ell,0}, \fin ) ) )
+        .
+    \end{aligned}
+  \end{equation}
+  This formula is ``backward-propagating'' in the sense that to compute the gradient of the function $F^{\text{out},\ell+1}$
+  which takes as input the outputs of the layer $\ell$ we use the gradient of the function $F^{\text{out},\ell+2}$
+  which takes as inputs the outputs of the following layer $\ell+1$, this means that we are ``propagating backward''
+  from the layer $\ell+1$ to the layer $\ell$.
+  It remains to give explicitly the last terms on the right-hand side of~\eqref{eq:6}.
+  We get:
+  \begin{equation}
+    \label{eq:7}
+    \begin{aligned}
+      (DX^{\ell+1}_{v^{\ell+1}}) ( F^{\ell,0}([V]_{\ell,0}, \fin ) ) )
+      &= \llangle w, D\varphi( F^{\ell,0}([V]_{\ell,0}, \fin )  )\rrangle
+        .
+    \end{aligned}
+  \end{equation}
+  Note that both $w$ and $D\varphi( F^{\ell,0}([V]_{\ell,0}, \fin )  )$ are matrices.
+  Hence the pairing $\llangle\cdot,\cdot\rrangle$ returns a matrix of components:
+  \begin{equation*}
+    [\llangle w, D\varphi( F^{\ell,0}([V]_{\ell,0}, \fin )  )\rrangle]_{nm}
+    = \sum_{n'=1}^N [w]_{nn'}  \partial_m [\varphi(F^{\ell,0}([V]_{\ell,0}, \fin )  ) ]_{n'}
+    ,
+    \quad n,m\in\{1,\dots,N\}
+  \end{equation*}
 
 
 
 
-
-\begin{align*}
-	\partial_{w^{(2)}} F(f_{\text{in}}, w)
- 	&= \partial_{w^{(2)}} x^{(3)} \\
-	&=  \partial_{w^{(2)}} x^{(3)} \\
-	&=  \varphi( x^{(1)} )
-	.
-\end{align*}
-\begin{align*}
-	\partial_{b^{(2)}} F(f_{\text{in}}, w)
-	&= 1
-	.
-\end{align*}
-
-\begin{align*}
-	\partial_{w^{(1)}} F(f_{\text{in}}, w)
-	&= \partial_{w^{(1)}}   x^{(3)}  \\
-	&= \partial_{w^{(1)}} x^{(3)} \\
-	&= \frac{\partial x^{(3)} }{ \partial x^{(2)} } \partial_{w^{(1)}} x^{(2)} \\
-	&=  w^{(2)} \varphi'( x^{(2)} ) \varphi( x^{(1)} ) 
-	.
-\end{align*}
-\begin{align*}
-	\partial_{b^{(1)}} F(f_{\text{in}}, w)
-	&= 
-	\frac{\partial x^{(3)}}{\partial x^{(2)}} \partial_{b^{(1)}} x^{(2)}\\
-	&=
-	w^{(2)}\varphi'(x^{(2)}) 
-	.
-\end{align*}
-
-\begin{align*}
-	\partial_{w^{(0)}} F(f_{\text{in}}, w)
-	&= \partial_{w^{(0)}} x^{(3)} \\
-	&= \frac{\partial x^{(3)}}{\partial x^{(2)}} \partial_{w^{(0)}} x^{(2)} \\
-	&= \frac{\partial x^{(3)}}{\partial x^{(2)}} \frac{ \partial x^{(2)} } {\partial x^{(1)} } \partial_{w^{(0)}} x^{(1)} \\
-	&= w^{(2)} \varphi'( x^{(2)} ) w^{(1)} \varphi'(x^{(1)} ) f_{\text{in}}
-	.
-\end{align*}
-\begin{align*}
-	\partial_{b^{(0)}} F(f_{\text{in}}, w)
-	&= \partial_{b^{(0)}} x^{(3)} \\
-	&= \frac{\partial x^{(3)}}{\partial x^{(2)}} \partial_{b^{(0)}} x^{(2)} \\
-	&= \frac{\partial x^{(3)}}{\partial x^{(2)}} \frac{ \partial x^{(2)} } {\partial x^{(1)} } \partial_{b^{(0)}} x^{(1)} \\
-	&= w^{(2)} \varphi'( x^{(2)} ) w^{(1)} \varphi'(x^{(1)}) 
-	.
-\end{align*}
-We write this compactly as follows:
-\begin{align*}
-	\partial_{b^{(L)}} F( f_{\text{in}}, w )
-			&= \prod_{\ell=L+1}^{3-1} w^{(\ell)} \varphi'_{\ell}( x^{(\ell)} ), \\ 
-	\partial_{w^{(L)}} F( f_{\text{in}}, w )
-			&= \big(\prod_{\ell=L+1}^{3-1} w^{(\ell)} \varphi'_{\ell}( x^{(\ell)} ) \big) \varphi_L(x^{(L)})
-	,
-\end{align*}
-where we have set for convenience
-\begin{align*} 
-	x^{(0)} &= 0 ,\\
-	\varphi_{0}(x) &\equiv 1
-	.
-\end{align*}
-asdfzxcv
-\end{example}
-
-
-\begin{example}
-Next we consider the case with $N$ total neurons per layer.
-For simplicitly we let
-$L=2$ as before.
-
-We set $v$ to denote the pair $(b,w)$,
-$v \deq (b,w)$,
-and we define:
-\begin{align*}
-	[F(f_{\text{in}}, v)]_{j} 
-	&\deq b^{(L)}_j  +  w^{(L)}_{jk} \varphi^{(L)}_k( x^{(L)}_k ) \\
-	&= b^{(2)}_j + w^{(2)}_{jk_2} \varphi^{(2)}_{k_2}( x^{(2)}_{k_2} ) \\
-	&= b^{(2)}_j + w^{(2)}_{jk_2} \varphi^{(2)}_{k_2}( b^{(1)}_{k_2} + w^{(1)}_{k_2 k_1} \varphi^{(1)}_{k_1}( x^{(1)}_{k_1} )  ) \\
-	&= b^{(2)}_j + w^{(2)}_{jk_2} \varphi^{(2)}_{k_2}( b^{(1)}_{k_2} + w^{(1)}_{k_2 k_1} \varphi^{(1)}_{k_1}( 
-									b^{(0)}_{k_1} + w^{(0)}_{k_1 k_0} f^{\text{in}}_{k_0}   ) \\
-\end{align*}
-This becomes recursively defined as follows:
-\begin{align*}
-	F_j(f^{\text{in}}, v)
-	&\deq x^{(L+1)}_j\\
-	x^{(\ell+1)}_{j} &\deq b^{(\ell)}_j + \sum_{k=1}^N w^{(\ell)}_{jk}\varphi^{(\ell)}_k ( x^{(\ell)}_k ),
-		\quad \ell\in \{0,\dots, L\},\\
-	x^{(0)}_j &\deq f^{\text{in}}_j
-	,
-\end{align*}
-with $j\in\{1,\dots,N\}$
-and
-where $\varphi^{(\ell)}_k$, $k\in\{1,\dots,N\}$, $\ell\in\{0,\dots,L\}$, 
-is the activation function of the $k$-th neuron in the $\ell$-th layer and we set
-$$
-\varphi^{(0)}_k ( f^{\text{in}}_k ) \equiv f^{\text{in}}_k 
-,
-$$
-that is the activation function of the inputs is the identity function. 
-
-We now compute the derivatives step by step.
-First we have
-\begin{align*}
-	\partial_{w^{(\ell)}_{jk} } x^{(\ell+1)}_{j'}
-	&= 
-	\sum_{k'} \delta_{jj'}\delta_{kk'} \varphi^{(\ell)}_{k'}(x^{(\ell)}_{k'} ) \\
-	&=
-	\delta_{jj'} \varphi^{(\ell)}_k ( x^{(\ell)}_k )
-	.
-\end{align*}
-Second we have
-\begin{align*}
-	\partial_{x^{(\ell)}_j } x^{(\ell+1)}_k = w^{(\ell)}_{jk} 
-\end{align*}
-
-Now let us compute
-\begin{align*}
-	\partial_{w^{(\ell-h)}_{jk}} x^{(\ell+1)}_{j'}
-	&= 
-	\sum_{k_{\ell},\dots,k_{\ell-h+1}}
-		\frac{\partial x^{(\ell+1)}_{j'} }{ \partial x^{(\ell)}_{k_\ell} }
-		\frac{\partial x^{(\ell)}_{k_\ell} }{ \partial x^{(\ell-1)}_{k_{\ell-1}} } 
-			\cdots \frac{\partial x^{(\ell-h+2)}_{k_{\ell-h+2}} }{ \partial x^{(\ell-h+1)}_{k_{\ell-h+1}} } 
-				\partial_{w^{(\ell-h)}_{jk} } x^{(\ell-h+1)}_{k_{\ell-h+1}} \\
-	&=
-	[ w^{(\ell)} w^{(\ell-1)}\cdots w^{(\ell-h+1)} ]_{j' j} \delta_{jj'} \varphi^{(\ell-h)}_k( x^{(\ell-h)}_k )
-\end{align*}
+  
 
 
 
