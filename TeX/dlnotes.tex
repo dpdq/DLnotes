@@ -34,6 +34,7 @@
 \usepackage{mathrsfs} %% \mathscr
 %\usepackage{stix} %% 
 \usepackage{bbm} %% \mathbbm to get the blackboard bold 1
+\usepackage{stmaryrd} %% to get [[ and ]] 
 
 \usepackage{hyperref}
 
@@ -373,6 +374,11 @@
 
 \newcommand*{\fin}{{f^{\text{in}}}}
 \newcommand*{\SET}[1]{{\{ 0, \dots, #1 - 1 \}}}
+\newcommand*{\boldcol}{{\,\boldsymbol{:}\,}} 
+\DeclareFontEncoding{LS1}{}{}
+\DeclareFontSubstitution{LS1}{stix}{m}{n}
+\DeclareSymbolFont{symbols2}{LS1}{stixfrak}{m}{n}
+\DeclareMathSymbol{\typecolon}{\mathbin}{symbols2}{"25}
 
 
 % completed direct sum and product
@@ -674,8 +680,7 @@
 
 
 
-% \title{Note on Free Fermions: the ultimate cheat sheet}
-%\title{Pedantic notation for free Dirac fields}
+
 \title{Deel learning, notes}
 \author{L. M. Borasi}
 %\email{borasi@iam.uni-bonn.de}
@@ -693,14 +698,13 @@
 \end{abstract}
 \tableofcontents
 
-\section{Back propagation}
 
+\section{MLP}
+\subsection{General notation}\label{sec:general-notation}
 Let the output of a NN be a vector $f_{\text{out}}\in \mathcal H_{\text{out}}$ 
-where $\mathcal H_{\text{out}}$ is a vector space.
-We make $\mathcal H_{\text{out}}$ into a Hilbert space by defining a scalar product $\langle\cdot,\cdot\rangle$.
-The Hilbert norm is then $\|f\|\deq \sqrt{\langle f,f\rangle}$ 
-
-
+where $\mathcal H_{\text{out}}$ is a Hilbert space with scalar product $\langle\cdot,\cdot\rangle$
+and Hilbert norm $\|f\|\deq \sqrt{\langle f,f\rangle}$.
+ 
 Consider $(e_i)_{i\in I}$ to be a Hilbert basis of $\mathcal H_{\text{out}}$.
 Then
 \begin{equation*}
@@ -710,50 +714,55 @@ Then
 \end{equation*}
 where we have used the notation $[f]_i \deq \langle f, e_i\rangle$, $i\in I$, to denote the $i$-th component of $f$.
 
-
-
 Similarly let $\mathcal H_{\text{in}}$ the vector space of inputs.
-Moreover, let $\mathcal W$ be the vector space of weights. The graph of the network is an element $w\in\mathcal W$.
+Moreover, let $\mathbb V$ be the vector space of weights.
+Following the standard convention we consider a weight $V\in\mathbb V$ to be composed of two components:
+$V = (b,w)$ where $b\in \mathbb B$, $w\in\mathbb W$, with $\mathbb V=\mathbb B\oplus\mathbb V$.
+An element $W\in\mathbb W$ is a collection of weighted edges which characterize the NN.
+An element $B\in\mathbb B$ is the collection of ``additive coefficients'' (see below).
 
-We now consider the ``characteristic function''  $F:\mathcal H_{\text{in}} \times \mathcal W \rightarrow \mathcal H_{\text{out}}$.
-This function characterizes the NN completely, given the weights $w\in\mathcal W$ and the inputs $f_{\text{in}}$,
+We now consider the \textit{transition function}  $F:\mathcal H_{\text{in}} \times \mathbb V \rightarrow \mathcal H_{\text{out}}$.
+This function characterizes the NN completely, in the sense that, given the weights $w\in\mathcal W$ and the inputs $f_{\text{in}}$,
 $F(f_{\text{in}}, w)\in\mathcal H_{\text{out}}$ is the output returned by the NN.
 
-We consider the cost function
+We consider the \textit{cost function} $S:\mathbb V\rightarrow \RR$ given by
 \begin{equation*}
-	S(w) \deq \sum_{f_{\text{in}}\in\mathcal H_{\text{in}}} \| F(f_{\text{in}}, w) - r(f_{\text{in}}) \|^2,
-	\quad w\in\mathcal W
+	S(V) \deq \sum_{f_{\text{in}}\in\mathcal H_{\text{in}}} \| F(f_{\text{in}}, V) - F_\infty(f_{\text{in}}) \|^2,
+	\quad V\in\mathbb V
 	.
 \end{equation*}
-Here $r:\mathcal H_{\text{in}}\rightarrow\mathcal H_{\text{out}}$ is the ``reference function'',
-that is a function that returns the ``reference output'' for each input (in principle we could have absorbed $r$ into $F$,
+Here $F_\infty:\mathcal H_{\text{in}}\rightarrow\mathcal H_{\text{out}}$ is the ``reference function'',
+that is a function that returns the ``reference output'' for each input (in principle we could have absorbed $F_\infty$ into $F$,
 but for clarity we keep them separated).
 
-For a fixed $w\in\mathcal W$, consider $\nabla S(w)$ as an element of $\mathcal W$.
+
+\subsection{Gradient descent}
+
+For a fixed $V\in\mathbb V$, consider $\nabla S(V)$ as an element of $\mathbb V$.
 Consider the expansion
 $$
-S(w-\epsilon\nabla S(w)) = S(w) - \epsilon {\|\nabla S(w)\|}^2 + R(w,\epsilon)
-\quad u\in U\subset\mathcal W,\quad 0<\epsilon<1
+S(V-\epsilon\nabla S(V)) = S(V) - \epsilon {\|\nabla S(V)\|}^2 + R(V,\epsilon)
+\quad V\in \mathcal U\subset\mathbb V,\quad 0<\epsilon<1
 .
 $$
 
 Let
-$U \subset \mathcal W$, and $0<\epsilon<1$, such that  $R(w, \epsilon) \le C(U) \epsilon^2$, $w\in U$.
+$\mathcal U \subset \mathbb V$, and $0<\epsilon<1$, such that  $R(w, \epsilon) \le C(U) \epsilon^2$, $w\in U$.
 Then
 \begin{align*}
-	&S(w - \epsilon \nabla S(w) ) = S(w) - \epsilon {\| \nabla S(w) \|}^2  + \epsilon^2 C(U)\\
-	&S(w - \epsilon \nabla S(w) )  - S(w)  = -\epsilon {\| \nabla S(w) \|}^2+ \epsilon^2 C(U)\\
-	&\qquad \le -\epsilon  {\| \nabla S(w) \|}^2 + \epsilon^2 |C(U)|
+	&S(V - \epsilon \nabla S(V) ) = S(V) - \epsilon {\| \nabla S(V) \|}^2  + \epsilon^2 C(\mathcal U)\\
+	&S(V - \epsilon \nabla S(V) )  - S(V)  = -\epsilon {\| \nabla S(V) \|}^2+ \epsilon^2 C(\mathcal U)\\
+	&\qquad \le -\epsilon  {\| \nabla S(V) \|}^2 + \epsilon^2 |C(\mathcal U)|
 	.
 \end{align*}
-Assume $\|\nabla S(w)\|_{\mathcal W}\| \ne 0$, then
-let $\epsilon$ such that $\epsilon|C(U)| < \frac12 {\|\nabla S(w)\|}_{\mathcal W}$.
+Assume $\|\nabla S(V)\|_{\mathbb V}\| \ne 0$, then
+let $\epsilon$ such that $\epsilon|C(\mathcal U)| < \frac12 {\|\nabla S(w)\|}_{\mathcal W}$.
 Then 
 \begin{equation*}
-	S(w - \epsilon \nabla S(w) )  - S(w) < -\frac{\epsilon}{2} {\|\nabla S(w)\|}_{\mathcal W} < 0
+	S(V - \epsilon \nabla S(V) )  - S(V) < -\frac{\epsilon}{2} {\|\nabla S(V)\|}_{\mathbb V} < 0
 		.
 \end{equation*}
-Hence we have
+Hence we have sketched the proof of the following.
 \begin{theorem}
 	For $U\subset\mathcal W$ compact, and $w\in U$ fixed,
 	there exists an $\epsilon>0$ such that
@@ -761,25 +770,66 @@ Hence we have
 	S(w-\epsilon\nabla S(w)) \le S(w)
 	.
 	$$
-	and if $\nabla S(w)\ne 0$, then $\le$ can be replaced by $<$. 
+	and if $\nabla S(w)\ne 0$, then $\le$ can be replaced by $<$.
+        \qed{}
 \end{theorem}
 
-\begin{example}
-  We consider a FNN with $N\in\NN$ neurons per layer and $L\in\NN$ layers.
-  Let $\varphi^\ell:\RR^N\rightarrow\RR^N$ be the activation function of the neuron in the $\ell$-th layer, $\ell\in\{1,\dots, L\}$.
+
+\subsection{MLP and filtration}
+  We consider a MLP  with $N\in\NN$ neurons per layer and $L\in\NN$ layers.
+  Let, with reference to  the notation of subsection~\ref{sec:general-notation},
+  $\mathcal H^{\text{in}} \deq \RR^N$, $\mathbb B \deq \RR^{N}\times\RR^{L}$, $\mathbb W \deq \RR^{N}\times\RR^N\times\RR^L$.
+  Moreover we consider each layer as being the input of the next.
+  Therefore we set $\mathcal H$ to be a copy of $\mathcal H^{\text{in}}$
+  as the abstract space of inputs (to a generic layer $\ell\in\{1,\dots, L\}$).
+
+  We consider the ``filtration'' over the layers.
+  By this we mean the following.
+  First, we decompose $\mathbb V =\mathbb B\oplus\mathbb V$ as a direct sum of spaces indexed by the layers:
+  \begin{align*}
+    \mathbb V &= \underbrace{\mathcal V \oplus\cdots\oplus \mathcal V}_{L \text{ times}} \\
+    \mathcal V &= \mathcal B\oplus \mathcal W, \quad \mathcal B\cong\RR^N,\quad\mathcal W\cong\RR^N\times\RR^N
+                 .
+  \end{align*}
+  Then we defined the spaces:
+  \begin{align*}
+    \mathbb V_{\llbracket \ell + h,\ell\rrbracket} \deq \underbrace{\mathcal V\oplus\cdots\oplus\mathcal V}_{h \text{ times}}
+    .
+  \end{align*}
+  Note that these spaces define a filtration in the mathematical sense,
+  i.e. we have a sequence of spaces $\mathbb V_{\llbracket \ell ,0 \rrbracket}$, $\ell\in\{1,\dots,L\}$, which satisfy
+  \begin{align*}
+    \mathbb V 
+    =\mathbb V_{\llbracket L+1 ,0 \rrbracket}\supset \mathbb V_{\llbracket L ,0 \rrbracket}
+    \supset \cdots\supset \mathbb V_{\llbracket 1 ,0 \rrbracket} \cong\mathcal V
+    .
+  \end{align*}
+  We employ the same notation for the space $\mathbb B$, $\mathbb W$.
+  
+  Let $\Phi^\ell:\mathcal H\rightarrow\mathcal H$.
+  Usually one takes $\Phi$ of the form
+  \begin{align*}
+    [\Phi^\ell( x )]_n = \varphi^\ell( x_n ), \quad x=(x_1,\dots,x_N)\in\mathcal H
+    ,
+  \end{align*}
+  where $[\cdot]_n$, $n\in\{1,\dots,N\}$, denotes the $n$-th component of a vector in $\mathcal H$;
+  here $\varphi:\RR\rightarrow\RR$ is the activation function of the $n$-th neuron on the $\ell$-th
+  layer and every neuron on the same layer has the same activation function.
   It is convenient, to write down more compact formulas, to define
   $$
   \varphi^0(x) \deq x,\quad x\in \RR^N
-  .
+  ,
   $$
-  We define recursively the FNN characteristic  function
-  $F:\mathcal V\times \mathcal  H_{\text{in}}\rightarrow \mathcal H_{\text{out}}$:
+  that is the ``activation function'' for the inputs $\fin\in\mathcal H^{\text{in}}$ is the identity function.
+  
+  We define recursively the MLP characteristic  function
+  $F:\mathbb V\times \mathcal  H_{\text{in}}\rightarrow \mathcal H_{\text{out}}$:
   \begin{equation}
     \label{eq:3}
     \begin{aligned}
-      F(V,f) &\deq X^{L+1} , \\
-      X^{\ell+1} &\deq b^\ell + w^\ell \varphi^\ell ( X^\ell ),\quad \ell \in \{ 1,\dots , L\} , \\
-      X^{0} &= f^{in},
+      F(V,f) &\deq x^{L+1} , \\
+      x^{\ell+1} &\deq b^\ell + w^\ell \varphi^\ell ( x^\ell ),\quad \ell \in \{ 1,\dots , L\} , \\
+      x^{0} &= f^{in},
     \end{aligned}
   \end{equation}
   where $v=(w,b)\in\mathcal V$.
@@ -789,120 +839,97 @@ Hence we have
   .
   $$
 
-  We define the cost function to be $S:\mathcal V \rightarrow\RR$.
+  We define the cost function to be $S:\mathbb V \rightarrow\RR$.
   $$
   S(v) \deq \sum_{\fin\in\mathcal H^{\text{in}}} \|F(f_{\text{in}},v) - F_{\infty}(f_{\text{in}} ) \|^2
   .
   $$
 
-  We want to compute the gradient of $F(V,\fin) $. One could work with the notation of~e\eqref{eq:3},
-  then the result would still need some interpretation before it could be implemented rigorously in a programming language.
-  Therefore we introduce a more rigorous notation.
-
-  Let $\mathbb V$ be the space of weights. 
-  We consider the ``filtration'' over $\ell\in\SET{L}$ of the weights,
-  that is we consider $\mathbb V = \mathcal V_0\oplus\mathcal V_1\oplus \cdots\oplus\mathcal V_L$ where
-  $\mathcal V_\ell$, $\ell\in\SET{L}$, denotes the space of the weights which contribute to the layer $\ell$.
-  All the $\mathcal V_\ell$, $\ell\in\SET{L}$, can be taken isomorphic.
-
-  Similarly we can think of $L$ identical spaces $\mathcal H_0,\dots\mathcal H_{L-1}$,
-  where $\mathcal H_\ell$
-  describe the space of inputs of the $\ell$-th layer, , $\ell\in\SET{L}$. 
-
+  We want to compute the gradient of $S(V) $.
+  We want to do this rigorously and explicitly so that the implementation of the algorithm becomes straightforward.
+  What the problem with the notation in~\eqref{eq:3} is that each $x^{\ell}$ is an element of $\mathcal H$
+  and not a function.
+  To take derivative we need a notation which expresses the dependence of the $x^{\ell}$ on the weights (and on each other).
+  We do this taking advantage of the ``filtration'', i.e. on the fact that each layer can be thought as having a transition function
+  which takes as inputs the outputs of the previous layer.
   
-  Moreover we define ``filtered'' transition functions, i.e. we define the following functions
+  To express this concretely we define the $\ell$-th ``\textit{layer transition function}'':
   \begin{align*}
     X^{\ell+1}_{v}(x) &\deq b + w\varphi^\ell(x),
-                            \quad v=(b,w)\in\mathcal V^\ell,
-                            \quad x\in\mathcal H^\ell
+                            \quad v=(b,w)\in\mathcal V,
+                            \quad x\in\mathcal H
                             \quad \ell\in \{0,\dots, L-1\}
                             .
   \end{align*}
-  Then we extend this definition to get a transition function $F^{\ell+h,\ell}$ from the layer $\ell$ to the layer $\ell+h$:
+  We then define the ``\textit{filtered transition functions}'' to be the functions $F^{\ell',\ell}$, $\ell'>\ell$,  
+  given by
   \begin{align*}
-    F^{\ell+h,\ell}(V, x) &\deq X^{\ell+h}_{v^{\ell+h-1}}  (\dots  X^{\ell+2}_{v^{\ell+1}} ( X^{\ell+1} _{v^{\ell}} (x) ) \dots ) \\
+    F^{\ell+h,\ell}(V_{\llbracket L, \ell+1\rrbracket}, x) &\deq X^{\ell+h}_{v^{\ell+h-1}}  (\dots  X^{\ell+2}_{v^{\ell+1}} ( X^{\ell+1} _{v^{\ell}} (x) ) \dots ) \\
                        &\equiv (X^{\ell+h}_{v^{\ell+h-1}} \circ \dots \circ X^{\ell+2}_{v^{\ell+1}}  \circ X^{\ell+1}_{v^{\ell}}  )(x)
                          ,
   \end{align*}
   where
   \begin{align*}
-    V = (v^{\ell+h-1},\dots,v^{\ell+1}, v^{\ell} ) , \quad x\in\mathcal H^\ell
+    V_{\llbracket L, \ell+1\rrbracket}
+    \deq (v^{\ell+h-1},\dots,v^{\ell+1}, v^{\ell} ) \in\mathbb V_{\llbracket \ell+h-1,\ell\rrbracket} , \quad x\in\mathcal H^\ell
     ,
   \end{align*}
   and  where $\circ$ denotes composition of functions.
-  By definition we have
-  \begin{align*}
-    F^{\ell+1,\ell} \equiv X^{\ell+1}
-    .
-  \end{align*}
-  Note that $F^{\ell+h,\ell}$ is nothing but $x^{\ell+h}$, in our previous notation, seen as \textit{a function of} $x^{\ell}$.
-  In this sense the $F^{\ell',\ell'}$, $\ell'>\ell$, are just a more rigorous notation for the $x^{\ell'}$ where we explicitly consider $x^{\ell'}$
-  as a function with  a specific domain.
-  We can rewrite the NN characteristic function as follows
-  \begin{align*}
-    F(V,f^{\text{in}}) &= F^{L,0}(V, f^{\text{in}})  = X^{L}_{v^L}(  F^{L-1,0}(V\rest_{L-1},  f^{\text{in}} ) ), \\
-    X^{\ell+1}_{v^\ell}( F^{\ell,0}(V\rest_{L-1}, f^{\text{in}} ) )
-                       &= b^\ell + w^\ell \varphi^\ell( F^{\ell,0}(V\rest_{L-1}, f^{\text{in}}) )\\
-                       &=  b^\ell + w^\ell  \varphi^\ell ( X^{\ell}_{v^{\ell-1}} ( F^{\ell-1,0}(V\rest_{\ell-2}, f^{\text{in}})) ),
-                         \quad \ell\in\{0,\dots, L\} 
-                         .
-  \end{align*}
+  By definition we have  $F^{\ell+1,\ell} \equiv X^{\ell+1}$.
+  Moreover, by the ``compositional nature'' of $F^{\ell',\ell}$, we have
+  \begin{equation}
+    \label{eq:8}
+    \begin{aligned}
+      F(V,\fin) 
+      &= F^{L+1,\ell+1}(V_{\llbracket L, \ell+1\rrbracket}, \, F^{\ell,0}( V_{\llbracket \ell, 0\rrbracket} , \fin) \,)
+        ,
+        \quad \ell\in\{1,\dots,L\}
+        .
+    \end{aligned}
+  \end{equation}
 
-  Strong of this (perhaps a bit over complicated..) notation we now compute the gradient $\nabla F$.
-  By $\nabla F$ we mean the gradient (i.e. Jacobian matrix) with respect to the weights $V\in\mathbb V$:
+  With this notation, we can rewrite~\eqref{eq:3} in the following way:
+  \begin{equation}
+    \label{eq:9}
+    \begin{aligned}
+      F(V,f^{\text{in}}) &= F^{L+1,0}(V, f^{\text{in}})  , \\
+      F^{\ell+1,0}( V_{\llbracket \ell+1,0\rrbracket} , f^{\text{in}}  )
+                         &= b^\ell + w^\ell \varphi^\ell( F^{\ell,0}( V_{\llbracket \ell-1,0\rrbracket} , f^{\text{in}}) ) ,
+                           \quad \ell\in\{0,\dots, L\} 
+                           .
+    \end{aligned}
+  \end{equation}
+  We further rewrite these relations in a way that makes the parallel with~\eqref{eq:3} obvious.
+  Note first that
   \begin{align*}
-    [\nabla F (V, \fin) ]_{jk} \deq \frac{\partial}{\partial V_j} F_k( V,\fin)
-    .
+    F^{\ell+1,0}( V_{\llbracket \ell+1,0\rrbracket}, \fin )
+    &= X^{\ell+1}_{v^\ell} ( X^\ell_{v^{\ell-1}} ( a^\ell ) ), \\
+    F^{\ell,0}
+    &= X^{\ell}_{v^{\ell-1}}( a^\ell ) , \\
+    a &\equiv F^{\ell-1,0}( V_{\llbracket \ell-1,0\rrbracket} , f^{\text{in}}  )
+        .
   \end{align*}
-  It is convenient to introduce a notation also for the gradient with respect to the inputs.
-  Given a ``filtered transition function'' $F^{\ell',\ell}(V,x)$, we denote by $DF^{\ell',\ell}$
-  the gradient with respect to the input $x$:
-  \begin{align*}
-    [DF^{\ell',\ell}(V,x)]_{nm} \deq \frac{\partial}{\partial x_n} F^{\ell',\ell}_m(V,x)
-    .
-  \end{align*}
+  Then we can rewrite~\eqref{eq:3} as follows
+  \begin{equation}
+    \label{eq:10}
+    \begin{aligned}
+      F(V,f^{\text{in}}) &=  X^{L}_{v^L}(  a^{L-1} ), \\
+      X^{\ell+1}_{v^\ell}( X^\ell_{v^{\ell-1}} ( a^{\ell-1} ) )
+                         &=  b^\ell + w^\ell  \varphi^\ell ( X^{\ell}_{v^{\ell-1}} ( a^{\ell-1} ) ),
+                           \quad \ell\in\{0,\dots, L\} 
+                           .
+    \end{aligned}
+  \end{equation}
+  Here and in~\eqref{eq:9} the symbol $a$ is simply a place-holder to make the formulas more palatable.  
+  Comparing~\eqref{eq:10} with~\eqref{eq:3}, we see that we have the same form or inductive relation but in~\eqref{eq:10} the symbols
+  $X^{\ell}$ are now functions.
 
-  
+  Strong of this (perhaps a bit over complicated..) notation we are ready to compute the gradient $\nabla S$.
 
-
-  
-  Now, we compute step by step the derivatives:
-  First we have:
-
-  \more{Note that there isn't a good notation for this.. one could write
-    $\nabla \langle F(v)-F_\infty, F(v)-F_\infty \rangle = \langle 2(F(v)-F_\infty), \nabla F(v) \rangle$
-    but this is not very good notation.. A correct notation would be:
-    $ (\nabla f(x)){[h]} $ denotes the gradient in the direction $h$, then
-    $\nabla (\langle F(x), F(x)\rangle){[h]} = \langle 2F(x), (\nabla F(x)){[h]}\rangle$.
-  }
-  
-  \begin{align*}
-    [\nabla S(v)]_j
-    &= \frac{\partial}{\partial v_j} S(v) \\
-    &= \sum_{\fin\in\mathcal H^{\text{in}}} \frac{\partial}{\partial v_j} \sum_k (F_k(V,\fin) - [F_\infty]_k  )^2 \\
-    &= \sum_{\fin\in\mathcal H^{\text{in}}} \sum_k 2(F_k(V,\fin) - [F_\infty]_k)\frac{\partial}{\partial v_j} F_k(V,\fin)
-    .
-  \end{align*}
-  We compactly denote this as follows
-  \begin{align*}
-    \nabla S(V)
-    &= \sum_{\fin\in\mathcal H^{\text{in}}} \llangle 2(F(V,\fin) - F_\infty) , \nabla F(V) \rrangle,
-      V\in\mathbb V
-      .
-  \end{align*}
-
-  
-  We now want to compute $\nabla F$.
-  Using the ``filtration'' over $\ell$ we can consider the gradient $\nabla^\ell F$ only considering the weights that
-  contribute the layer $\ell$.
-  Explicitly we have
-  \begin{align*}
-    [\nabla^\ell F(V,\fin)]_{nm}
-    &\deq  \frac{\partial}{\partial v^\ell_n} F_m(V,\fin),
-      \quad V=(v^{L-1},\dots, v^\ell,\dots, v^0)
-      .
-  \end{align*}
-  We use the chain rule in the following form (cf.~ \cite[(1.4) p. 23, and (2.3) Theorem]{boothbyIntroductionDifferentiableManifolds2003}).
+  \subsection{Back-propagation}
+  For convenience we call \textit{gradient} both the gradient of a scalar-valued function and the Jacobian of a vector valued function.
+  We shall use the ``chain-rule'' for the gradient in the following form
+  (cf.~ \cite[formula (1.4) p. 23, and Theorem (2.3) p. 27]{boothbyIntroductionDifferentiableManifolds2003}).
   Given two functions $F:\RR^\mu\rightarrow\RR^\nu$, $G:\RR^\nu\rightarrow \RR^\rho $, $\mu,\nu,\rho\in\NN$, we let
   $H\deq G\circ F:\RR^\mu\rightarrow\RR^\rho$.
   Then we have
@@ -914,24 +941,69 @@ Hence we have
   where $DF$ and $DG$ represent the gradients of $F$ and $G$ 
   and
   where on the right-hand side we have the matrix product of the matrix $(DG)( F(x) )$ with the matrix $(DF)(x)$.
-  In our case we distinguish between the gradient with respect to the weights (which we denote by $\nabla$)
-  and the one with respect to the weights (which we denote by $\mathtt D$).
-  The straight forward specialization of this formula to our case reeds:
-  \begin{equation}\label{eq:4}
-    \begin{aligned}
-      \nabla^{\ell-1} F(V,\fin)
-      &= \nabla^{\ell-1} F^{L,\ell+1}([V]_{L,\ell}, F^{\ell,0}([V]_{\ell-1,0} , \fin ) ) \\
-      &= (\mathtt D F^{L+1,\ell+1})([V]_{L,\ell}, F^{\ell,0}([V]_{\ell,0}, \fin ) ) (\nabla^{\ell-1}  F^{\ell,0})([V]_{\ell-1,0} , \fin )
-        ,
-    \end{aligned}
-  \end{equation}
-  where       
+
+  Before computing the derivatives we introduce three notational conventions which will make the formulas clearer.
+
+  First: Consider a filtered transition function $F^{\ell',\ell}:\mathbb V_{\llbracket \ell' , \ell \rrbracket} \times\mathcal H\rightarrow \mathcal H$,
+  $\ell'>\ell$, $\ell',\ell\in\{0,\dots,L+1\}$.
+%  We denote the gradient of $F^{\ell',\ell}$ by $\mathcal D F^{\ell',\ell}$.
+  Since $F^{\ell',\ell}$ is a function of a pair of vector-variables $(V_{\llbracket \ell' , \ell \rrbracket},x)$,
+  where
+  $V_{\llbracket \ell' , \ell \rrbracket}\in\mathbb V_{\llbracket \ell' , \ell \rrbracket}$ are the weights, and
+  $x\in\mathcal H$ are the inputs,
+  we distinguish the gradients with respect to each of these variables.
+  We denote the gradient with respect to the weights by $\nabla F^{\ell',\ell}$
+  and we denote the gradient with respect  to the inputs by $\mathtt D F^{\ell',\ell}$.
+
+  Second: In computing the gradient, we want to take advantage of the ``compositional nature'' of the transition function.
+  To express this in the notation we define a gradient $\nabla^\ell$ to denote the gradient with respect to the variable
+  $v^\ell$ which lives in the $\ell$-th component of the decomposition
+  $\mathbb V=\underbrace{\mathcal V\oplus\cdots\oplus\mathcal V}_{L\text{ times}}$.
+
+  Third: Given two vectors $x,y\in\mathcal H$ we have the scalar product $\langle x, y\rangle\in\RR$.
+  We shall need an expression for pairing, instead of just two vectors, two tensors of different degree,
+  i.e. two arrays of different shape.
+  Let  $T\in\mathcal H^{\otimes d}$, respectively   $T'\in\mathcal H^{\otimes d'}$,
+  be a tensor of degree $d\in\NN$, respectively $d'\in\NN$.
+  This means that for example $T$ is represented by an array with $d$ indices:
+  $[T]_{n_1,\dots,n_d}$, $n_j\in\{1,\dots, N \}$ ($N$ being as before the dimension of $\mathcal H$).
+  We define the binary operation $\boldcol$  as follows.
+  It sends  $T,T'$ into the matrix $T\boldcol T'$ obtained by
+  contracting the right-most index of $T$ with the left-most index of $T'$.
+  That is $T\boldcol T'$ is a tensor of degree $d-1+d'-1 =d+d'-2$ of components:
   \begin{align*}
-    V = (v^{L-1},\dots, v^0),\quad [V]_{L-1,\ell} =(v^{L-1},\dots, v^{\ell}),\quad [V]_{\ell-1,0}=(v^{\ell-1},v^0)
+    [ T\boldcol T' ]_{n_1,\dots,n_{d-1}, n'_2,\dots, n'_{d'}}
+    &\deq \sum_{m=1}^N [T]_{n_1,\dots,n_{d-1},m} [T']_{m,n'_2,\dots,n'_{d'}}
     .
   \end{align*}
+  For two vectors $x,y\in\mathcal H$ we have $x\boldcol y =\langle x,y\rangle$.
+  For two matrices $A,B\in\mathcal H\otimes\mathcal H$ we have $A\boldcol B = AB$
+  where $AB$ denotes the standard matrix product of $A$ and $B$.
+  As this last example shows, the binary operation is \textit{not} symmetric (i.e. commutative) in general.
+    
+  With all of this out of the way,  we compute step by step the derivatives:
+  First we have:  
+  \begin{align*}
+    [\nabla^\ell S(v)]_n
+    &= \frac{\partial}{\partial [v^\ell]_n} S(v) \\
+    &= \sum_{\fin\in\mathcal H^{\text{in}}} \frac{\partial}{\partial [v^\ell]_n} \sum_m (F_m(V,\fin) - [F_\infty]_m  )^2 \\
+    &= \sum_{\fin\in\mathcal H^{\text{in}}} \sum_m 2(F_m(V,\fin) - [F_\infty]_m)\frac{\partial}{\partial [v^\ell]_n} F_m(V,\fin)\\
+    &= \sum_{\fin\in\mathcal H^{\text{in}}} \sum_m \big( \frac{\partial}{\partial [v^\ell]_n} F_m(V,\fin) \big) 2(F_m(V,\fin) - [F_\infty]_m)
+    .
+  \end{align*}
+  We compactly denote this, employing binary operation $\boldcol$ defined above, as follows
+  \begin{align*}
+    \nabla^\ell S(V)
+    &= \sum_{\fin\in\mathcal H^{\text{in}}}  \nabla^\ell F(V) \boldcol  2(F(V,\fin) - F_\infty)  ,
+      \quad      V\in\mathbb V,
+      \quad \ell\in\{0,\dots,L\}
+      .
+  \end{align*}
+
   
-  \more{This is a complicated way to write:
+  Second, we want to compute $\nabla^\ell F$.
+  We employ the chain rule as in~\eqref{eq:5}. 
+  The straight forward specialization of this formula to our case reeds\footnote{This is a complicated way to write:
     \begin{align*}
       \frac{\partial F_k(v)}{\partial v^\ell} 
       &= \frac{\partial x^L}{\partial v^\ell} \\
@@ -950,7 +1022,20 @@ Hence we have
       \end{aligned}
     \end{equation}
     We rewrite this in terms of the more rigorous notation employing the functions $F^{\ell',\ell}$.
-  }
+ }:
+  \begin{equation}\label{eq:4}
+    \begin{aligned}
+      \nabla^{\ell-1} F(V,\fin)
+      &= \nabla^{\ell-1} F^{L,\ell+1}([V]_{L,\ell}, F^{\ell,0}([V]_{\ell-1,0} , \fin ) ) \\
+      &= (\mathtt D F^{L+1,\ell+1})([V]_{L,\ell}, F^{\ell,0}([V]_{\ell,0}, \fin ) ) (\nabla^{\ell-1}  F^{\ell,0})([V]_{\ell-1,0} , \fin )
+        ,
+    \end{aligned}
+  \end{equation}
+  where       
+  \begin{align*}
+    V = (v^{L-1},\dots, v^0),\quad [V]_{L-1,\ell} =(v^{L-1},\dots, v^{\ell}),\quad [V]_{\ell-1,0}=(v^{\ell-1},v^0)
+    .
+  \end{align*}
 
   In formula~\eqref{eq:4} the term $ (\nabla^{\ell-1}  F^{\ell,0})([V]_{\ell-1,0} , \fin )$ can already be written down explicitly.
   To write it down we recall that the weight $v^\ell$ is composed of two parameters:  $v^\ell=(b^\ell,w^\ell)$.
@@ -959,59 +1044,101 @@ Hence we have
   \begin{equation*}
     \begin{aligned}
       (\nabla^{\ell-1}_b  F^{\ell,0})([V]_{\ell-1,0} , \fin ) &= \id,\\
-      (\nabla^{\ell-1}_w  F^{\ell,0})([V]_{\ell-1,0} , \fin ) &= \varphi^{\ell-1}(  F^{\ell-1,0}([V]_{\ell-2,0}, \fin  )
-                                                                .
+      (\nabla^{\ell-1}_w  F^{\ell,0})([V]_{\ell-1,0} , \fin ) &= \Phi^{\ell-1}(  F^{\ell-1,0}([V]_{\ell-2,0}, \fin  )
+                                                                ,
     \end{aligned}
   \end{equation*}
+  where $\id$ denotes the identity $N\times N$ matrix (that is the identity on $\mathcal H$).
+
+  Third:
   The term $(D F^{L+1,\ell+1})([V]_{L,\ell}, F^{\ell,0}([V]_{\ell,0}, \fin ) )$, on the right-hand side of~\eqref{eq:4},
   can be computed by applying again the chain rule~\eqref{eq:5}.
   In this way we get the following recursive relation which is the origin of the name \textit{back-propagation}:
   \begin{equation}\label{eq:6}
     \begin{aligned}
-      (D F^{L+1,\ell+1})([V]_{L,\ell}, F^{\ell,0}([V]_{\ell,0}, \fin ) )
-      &= (D F^{L+1,\ell+2})([V]_{L,\ell+1}, X^{\ell+1}_{v^{\ell+1}} ( F^{\ell,0}([V]_{\ell,0}, \fin ) ) )\mathbf\cdot\\
-      & \hspace{5cm}\mathbf\cdot  (DX^{\ell+1}_{v^{\ell+1}}) ( F^{\ell,0}([V]_{\ell,0}, \fin ) ) )
+      (D F^{L+1,\ell-1})(V_{\llbracket \ell - 2 , 0 \rrbracket } , F^{\ell-2,0}(V_{\llbracket \ell-3 , 0 \rrbracket } , \fin ) )
+      &= (D F^{L+1,\ell})([V]_{L,\ell-1}, X^{\ell-1}_{v^{\ell-2}} ( F^{\ell-2,0}([V]_{\ell-3,0}, \fin ) ) )\mathbf\cdot\\
+      & \hspace{3.5cm}\mathbf\cdot  (DX^{\ell-1}_{v^{\ell-2}}) ( F^{\ell-2,0}([V]_{\ell-3,0}, \fin ) ) )
+        ,
+    \end{aligned}
+  \end{equation}
+  where, on the right hand side the $\cdot$ denotes matrix multiplication.
+  Note that the term $DX^{\ell-1}_{v^{\ell-2}}$ in~\eqref{eq:6} can be computed explicitly.
+  Define the ``place-holder''
+  \begin{align*}
+    a^{\ell-2} &\equiv F^{\ell-2,0}( V_{\llbracket \ell-3,0\rrbracket} , f^{\text{in}}  ) \in\mathcal H
+                 .
+  \end{align*}
+  We get
+  \begin{align*}
+    [(DX^{\ell-1}_{v^{\ell-2}}) ( a^{\ell-2} ) )]_{nm}
+    &=  \frac{\partial}{\partial x_n}  \big( b^{\ell-2}_m + \sum_k w_{mk}\Phi_k( x ) \big)\Big|_{x = a^{\ell-2}} \\
+    &=   \sum_k w_{mk} \frac{\partial}{\partial x_n} \Phi_k( x )  \Big|_{x = a^{\ell-2}} \\
+    &=   \sum_k w_{mk}  [D\Phi( x )]_{nk}  \Big|_{x = a^{\ell-2}} \\
+    &=   w [D\Phi( a^{\ell-2} )]_{nk} \\
+    .
+  \end{align*}
+  Note that 
+  \begin{equation}
+    \label{eq:12}
+    \begin{aligned}
+      [D\Phi(a)]_{nk}
+      &=  \frac{\partial}{\partial x_n} \varphi( x_k ) \Big|_{x = a^{\ell-2} } \\
+      &=  \varphi' ( x_k )  \frac{\partial x_k}{\partial x_n}\Big|_{x = a^{\ell-2} } \\
+      &=  \varphi' ( x_k )  \delta_{nk} \Big|_{x = a^{\ell-2} } \\
+      &= \varphi'( [a]_n) \delta_{nk} \text{ (no sum over repeated indices) }
         .
     \end{aligned}
   \end{equation}
+  Hence,~\eqref{eq:6} becomes:
+  \begin{equation}\label{eq:11}
+    \begin{aligned}
+      (D F^{L+1,\ell-1})(V_{\llbracket \ell - 2 , 0 \rrbracket } , a^{\ell-2} )
+      &= (D F^{L+1,\ell})([V]_{L,\ell-1}, X^{\ell-1}_{v^{\ell-2}} ( a^{\ell-2} ) ) \boldsymbol\cdot (DX^{\ell-1}_{v^{\ell-2}}) ( a^{\ell-2} ) ) \\
+            &=  D\Phi(a^{\ell-2}) \boldsymbol\cdot  (D F^{L+1,\ell})(V_{\llbracket L,\ell-1\rrbracket}, X^{\ell-1}_{v^{\ell-2}} ( a^{\ell-2} ) ) 
+        ,
+    \end{aligned}
+  \end{equation}
+
+  
+  To obtain this formula we had to express each object as a function, so that we could differentiate with respect to its argument.
+  Now, to clarify the implementation of this formula, we go back to a ``declarative'' notation as in~\eqref{eq:1}.
+  We fix the weights $V\in\mathbb V$ and the inputs $\fin\in\mathcal H^{\text{in}}$, then we let
+  \begin{align*}
+    \mathbf J^{\ell} := (D F^{L+1,\ell})(V_{\llbracket \ell - 1 , 0 \rrbracket } , a^{\ell-1} , \fin ) )
+    ,
+  \end{align*}
+  where as usual we have the ``place-holder''
+  $a^{\ell-1} =  F^{\ell-1,0}( V_{\llbracket \ell-2,0\rrbracket} , f^{\text{in}}  ) \in\mathcal H $.
+  Note that
+  \begin{align*}
+    (D F^{L+1,\ell})(V_{\llbracket L,\ell-1\rrbracket}, X^{\ell-1}_{v^{\ell-2}} ( a^{\ell-2} ) )
+    &= (D F^{L+1,\ell})(V_{\llbracket L,\ell-1\rrbracket}, a^{\ell-1}  )
+      .
+  \end{align*}
+  Hence, from formula~\eqref{eq:11}, we get the ``back-propagating'' recursive relation
+  \begin{align*}
+    \mathbf J^{\ell-1}  = \mathtt D\Phi^{\ell-1}(a^{\ell-2}) \boldsymbol\cdot \mathbf J^{\ell} ,
+    \quad \ell\in\{1,\dots,L+1\}
+    .
+  \end{align*}
   This formula is ``backward-propagating'' in the sense that to compute the gradient of the function $F^{\text{out},\ell+1}$
   which takes as input the outputs of the layer $\ell$ we use the gradient of the function $F^{\text{out},\ell+2}$
   which takes as inputs the outputs of the following layer $\ell+1$, this means that we are ``propagating backward''
   from the layer $\ell+1$ to the layer $\ell$.
-  It remains to give explicitly the last terms on the right-hand side of~\eqref{eq:6}.
-  We get:
-  \begin{equation}
-    \label{eq:7}
-    \begin{aligned}
-      (DX^{\ell+1}_{v^{\ell+1}}) ( F^{\ell,0}([V]_{\ell,0}, \fin ) ) )
-      &= \llangle w, D\varphi( F^{\ell,0}([V]_{\ell,0}, \fin )  )\rrangle
-        .
-    \end{aligned}
-  \end{equation}
-  Note that both $w$ and $D\varphi( F^{\ell,0}([V]_{\ell,0}, \fin )  )$ are matrices.
-  Hence the pairing $\llangle\cdot,\cdot\rrangle$ returns a matrix of components:
-  \begin{equation*}
-    [\llangle w, D\varphi( F^{\ell,0}([V]_{\ell,0}, \fin )  )\rrangle]_{nm}
-    = \sum_{n'=1}^N [w]_{nn'}  \partial_m [\varphi(F^{\ell,0}([V]_{\ell,0}, \fin )  ) ]_{n'}
-    ,
-    \quad n,m\in\{1,\dots,N\}
-  \end{equation*}
-
-
-
-
   
-
-
-
-
-
-
-\end{example}
-
-
-
-
+  We put everything together in a formula ready for implementation.
+  \begin{proposition}
+    With notation as above we have
+    \begin{align*}
+      a^{\ell} &=  x^\ell ,\\
+      [\mathtt D\Phi^\ell(a^{\ell-1})]_{nm} &= {} ,\\
+      \mathbf J^{\ell-1} &= \prod_{\ell'=\ell}^L \mathtt D\Phi^{\ell'-1}(a^{\ell'-2}) ,\\
+                           \nabla^\ell F(V,\fin) &= {} ,\\ 
+      \nabla^\ell S(V) &= {}
+                         .
+    \end{align*}
+  \end{proposition}
 
 
 
