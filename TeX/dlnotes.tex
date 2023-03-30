@@ -31,9 +31,9 @@
 \usepackage{amsmath,amssymb}
 \usepackage{mathtools}  
 \usepackage{amsthm} %% For \newtheorem{}{}
-\usepackage{mathrsfs} %% \mathscr
+%\usepackage{mathrsfs} %% \mathscr ;; conflict with bbm
 %\usepackage{stix} %% 
-\usepackage{bbm} %% \mathbbm to get the blackboard bold 1
+\usepackage{bbm} %% \mathbbm to get the blackboard bold 1;; conflict with mathrsfs
 \usepackage{stmaryrd} %% to get [[ and ]] 
 
 \usepackage{hyperref}
@@ -256,7 +256,8 @@
 \newcommand{\deq}{\stackrel{\mathrm{def}}{=}}
 \newcommand{\dd}{\,\mathrm{d}}
 \newcommand{\ii}{\mathrm{i}}
-\newcommand{\id}{\,\mathbb{I}}
+%\usepackage{bbm}
+\newcommand{\id}{\,\mathbbm{1}}
 \DeclareMathOperator*{\Dom}{Dom}
 \DeclareMathOperator*{\Ran}{Range}
 \newcommand{\PP}{{\mathbb{P}}}
@@ -1062,6 +1063,10 @@ Then
   \end{equation}
   where $DF$ and $DG$ represent the gradients of $F$ and $G$ 
   and  where on the right-hand side we have the matrix product of the matrix $(DG)( F(a) )$ with the matrix $(DF)(a)$.
+  Note that these two matrices have, in general, different shapes:
+  $DG( F(a) )$ is a linear map $\RR^{\rho}\rightarrow\RR^{\nu}$, hence it is represented by a matrix of shape $(\rho,\nu)$, 
+  whereas $DF(a)$ is a linear map $\RR^{\nu}\rightarrow\RR^{\mu}$, thus its matrix representation has shape $(\nu,\mu)$.
+  
   We use the same convention as~\cite{boothbyIntroductionDifferentiableManifolds2003} with regard to the definition
   of the matrix $DF(a)$, that is
   \begin{equation*}
@@ -1082,7 +1087,10 @@ Then
   we distinguish the gradients with respect to each of these variables.
   We denote the gradient with respect to the weights by $\nabla F^{\ell',\ell}$
   and we denote the gradient with respect  to the inputs by $\mathtt D F^{\ell',\ell}$.
+  % Moreover given that a weight $v\in\mathcal V$ is itself a pair  $v=(b, w)$, $b\in\mathcal B$, $w\in\mathcal W$,
+  % we shall distinguish between the gradient ``in the direction $\mathcal B$'', which we shall denote by $
 
+  
   Second: In computing the gradient, we want to take advantage of the ``compositional nature'' of the transition function.
   To express this in the notation we define a gradient $\nabla^\ell$ to denote the gradient with respect to the variable
   $v^\ell$ which lives in the $\ell$-th component of the decomposition
@@ -1112,12 +1120,12 @@ Then
   With all of this out of the way,  we compute step by step the derivatives:
   First we have:  
   \begin{align*}
-    [\nabla^\ell S(v)]_n
-    &= \frac{\partial}{\partial [v^\ell]_n} S(v) \\
-    &= \sum_{\fin\in\mathcal H^{\text{in}}} \frac{\partial}{\partial [v^\ell]_n} \sum_m (F_m(V,\fin) - [F_\infty]_m  )^2 \\
-    &= \sum_{\fin\in\mathcal H^{\text{in}}} \sum_m 2(F_m(V,\fin) - [F_\infty]_m)\frac{\partial}{\partial [v^\ell]_n} F_m(V,\fin)\\
-    &= \sum_{\fin\in\mathcal H^{\text{in}}} \sum_m \big( \frac{\partial}{\partial [v^\ell]_n} F_m(V,\fin) \big) 2(F_m(V,\fin) - [F_\infty]_m)\\
-    &= \sum_{\fin\in\mathcal H^{\text{in}}} \sum_m 2 [(\nabla^\ell F)(V,\fin)^{\mathtt t}]_{nm} (F_m(V,\fin) - [F_\infty]_m)
+    [\nabla^\ell S(v)]_m
+    &= \frac{\partial}{\partial [v^\ell]_m} S(v) \\
+    &= \sum_{\fin\in\mathcal H^{\text{in}}} \frac{\partial}{\partial [v^\ell]_m} \sum_n (F_n(V,\fin) - [F_\infty]_n  )^2 \\
+    &= \sum_{\fin\in\mathcal H^{\text{in}}} \sum_n 2(F_n(V,\fin) - [F_\infty]_n)\frac{\partial}{\partial [v^\ell]_m} F_n(V,\fin)\\
+    &= \sum_{\fin\in\mathcal H^{\text{in}}} \sum_n \big( \frac{\partial}{\partial [v^\ell]_m} F_n(V,\fin) \big) 2(F_n(V,\fin) - [F_\infty]_n)\\
+    &= \sum_{\fin\in\mathcal H^{\text{in}}} \sum_n 2 [(\nabla^\ell F)(V,\fin)^{\mathtt t}]_{mn} (F_n(V,\fin) - [F_\infty]_n)
     ,
   \end{align*}
   where the superscript $\mathtt t$ denotes the matrix-transposition.
@@ -1170,12 +1178,32 @@ Then
   We obtain, for $\ell\in\{1,\dots,L\}$,
   \begin{equation}\label{eq:13}
     \begin{aligned}
-      (\nabla^{\ell-1}_b  F^{\ell,0})([V]_{\ell-1,0} , \fin ) &= \id,\\
-      (\nabla^{\ell-1}_w  F^{\ell,0})([V]_{\ell-1,0} , \fin ) &= \Phi^{\ell-1}(  F^{\ell-1,0}([V]_{\ell-2,0}, \fin  )
+      (\nabla^{\ell-1}_b  F^{\ell,0})([V]_{\ell-1,0} , \fin ) &= \id_{\mathcal H\rightarrow\mathcal H} ,\\
+      (\nabla^{\ell-1}_w  F^{\ell,0})([V]_{\ell-1,0} , \fin ) &= \Phi^{\ell-1}(  F^{\ell-1,0}([V]_{\ell-2,0}, \fin  )^{\mathcal H\leftarrow\mathcal W}
                                                                 ,
     \end{aligned}
   \end{equation}
-  where $\id$ denotes the identity $N\times N$ matrix (that is the identity on $\mathcal H$).
+  where $\id_{\mathcal H\rightarrow\mathcal H}$ denotes the identity $N\times N$ matrix, that is the identity on $\mathcal H$,
+  and $\Phi^{\ell-1}(  F^{\ell-1,0}([V]_{\ell-2,0}, \fin  )^{\mathcal H\leftarrow\mathcal W}$ denotes the map $\mathcal W\rightarrow\mathcal H$
+  given in components by
+  \begin{equation*}
+    \Phi^{\ell-1}(  F^{\ell-1,0}([V]_{\ell-2,0}, \fin  )^{\mathcal H\leftarrow\mathcal W} ( u ) 
+    =  u \, \Phi^{\ell-1}(  F^{\ell-1,0}([V]_{\ell-2,0}, \fin  ) ,
+  \end{equation*}
+  where on the right-hand side we consider the matrix product of the matrix $u\in\mathcal W$, thought of as a linear map $u:\mathcal H\rightarrow\mathcal H$,
+  with the vector $\Phi^{\ell-1}(  F^{\ell-1,0}([V]_{\ell-2,0}, \fin  ) \in\mathcal H$.
+  In components we have
+  \begin{equation*}
+    [    \Phi^{\ell-1}(  F^{\ell-1,0}([V]_{\ell-2,0}, \fin  )^{\mathcal H\leftarrow\mathcal W} ]_{m, n_1, n_2} = \delta_{m n_1}  [ \Phi^{\ell-1}(  F^{\ell-1,0}([V]_{\ell-2,0}, \fin  ) ]_{n_2}
+    ,\quad m,  n_1, n_2\in\{ 1,\dots, N\}
+    ,
+  \end{equation*}
+  where $m$ is  the index of a one dimensional array representing a vector $x\in\mathcal H$ whereas
+  $n_1, n_2$ are indices of a two dimensional array representing an element $w\in\mathcal W$.
+  At the moment the notation in~\eqref{eq:13} is the best I could come up with, but it doesn't look completely satisfactory.
+  One should maybe first start by introducing a pairing between elements in $\mathcal W$ and elements in $\mathcal H$
+  (the standard product of a matrix with a column vector) and then talk about the ``dual'' with respect to such a pairing,
+  but I'm still unsure.
 
   Third:
   The term $(D F^{L,\ell})[V_{\llbracket L-1,\ell\rrbracket}, x^\ell )$, on the right-hand side of~\eqref{eq:12},
@@ -1297,7 +1325,9 @@ Then
       \label{eq:20}
       \begin{aligned}
         [\mathtt D\Phi^\ell(x^{\ell-1})]_{mn} &= \varphi'( [a]_n) \delta_{mn} \; \text{ (no sum over repeated indices) } ,\\
-        \mathbf J^{\ell-1} &= \prod_{\ell'=L}^{\ell} \mathtt D\Phi^{\ell'}(x^{\ell'-1})  = \mathbf J^{\ell} \, w^{\ell} D\Phi^{\ell}(x^{\ell-1}), \quad \mathbf J^L =\id, \\
+        \mathbf{J}^{\ell-1} &= \prod_{\ell'=L}^{\ell} \left(   w^\ell \,  (\mathtt D \Phi^{\ell'})  (x^{\ell'-1}) \right)
+                             =   \mathbf J^{\ell} \, w^{\ell} \, (\mathtt D\Phi^{\ell}) (x^{\ell-1})  ,
+                             \quad \mathbf J^L =\id  , \\
         \nabla^{\ell}_b F(V,f) &= \mathbf J^{\ell}  ,\\
         \nabla^{\ell}_w F(V,f) &= \mathbf J^{\ell} \Phi^{\ell}( x^{\ell-1} ) ,\\ 
         \nabla S(V) &= 2 (\nabla F)(V,f)^{\mathtt t} \,  (F(V,f) - F_\infty(f) )
@@ -1313,9 +1343,36 @@ Then
     the forth line was obtained in~\eqref{eq:10}
     .
   \end{proof}
-
-
-
+  \begin{corollary}
+    With the same notation as the theorem, we have the following.
+    \begin{align*}
+      \nabla^{\ell-1}_b S( V )
+      &= (\mathtt D \Phi^\ell)(x^{\ell-1} )^{\mathtt t} (w^\ell)^{\mathtt t} \nabla^{\ell}_b S( V ) , \\
+      \nabla^{\ell-1}_w S( V )  
+      &=2 ( \Phi^{\ell} (x^{\ell-1})^{\mathcal H\leftarrow\mathcal W} )^{\mathtt t}   \, (\nabla^{\ell}_b S)( V )
+                                 ,
+    \end{align*}
+    where the transposition in the last line in components reads
+    \begin{equation*}
+      [ (\Phi^{\ell}(x^{\ell-1}) ^{\mathcal H\leftarrow\mathcal W})^{\mathtt t} ]_{n_1,n_2,m} = [\Phi^{\ell}(x^{\ell-1}) ^{\mathcal H\leftarrow\mathcal W}]_{m,n_1,n_2}
+      ,
+      \quad m,n_1,n_2\in\{1,\dots,N\}
+      .
+    \end{equation*}
+  \end{corollary}
+  \begin{proof}
+    We have
+    \begin{align*}
+      \nabla^{\ell-1}_b S( V ) &= 2 (\mathbf J^{\ell-1})^{\mathtt t}  ( F(V,f) - F_\infty(f) )\\
+                               &= (\mathtt D \Phi^\ell)(x^{\ell-1} )^{\mathtt t} (w^\ell)^{\mathtt t} \mathbf J^\ell (F(V,f) - F_\infty(f) ) \\
+                               &= (\mathtt D \Phi^\ell)(x^{\ell-1} )^{\mathtt t} (w^\ell)^{\mathtt t} \nabla^{\ell}_b S( V ) , \\
+      \nabla^{\ell-1}_w S( V ) &= 2  (\Phi^{\ell}(x^{\ell-1}) ^{\mathcal H\leftarrow\mathcal W})^{\mathtt t}
+                                 \Phi^{\ell}(x^{\ell-1}) ^{\mathtt t}  (\mathbf J^{\ell-1})^{\mathtt t}  ( F(V,f) - F_\infty(f) )\\
+                               &=2 (\Phi^{\ell}(x^{\ell-1}) ^{\mathcal H\leftarrow\mathcal W})^{\mathtt t} (\mathtt D \Phi^\ell)(x^{\ell-1} )^{\mathtt t} (w^\ell)^{\mathtt t} \nabla^{\ell}_b S( V )
+                                 .
+                                 \qedhere
+    \end{align*}
+  \end{proof}
 % \newpage
 % \subsection*{}
 

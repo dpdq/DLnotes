@@ -1,49 +1,60 @@
+"""
+Notation:
+--------------
+N: number of neurons per layer
+L -1: number of hidden layers
+ell: index in [0, ... , L -1]
+f_input: N array, this is layer 0 of the MLP (MultiLayer Percetron)
+x: Nx(L+1) array, x[ : , ell] are the inputs for the layer ell+1, x[ : , L] are the outputs
+b: NxL array, b[ : , ell] are the additive weights for the layer ell+1
+W: NxNxL array, W[ : , : , ell] are the ''matrix-weights" for the layer ell+1
+phi: activation function (component wise, i.e. "universal" for numpy)
+phi_prime: derivative of phi (component wise, i.e. "universal" for numpy)
+transition: transition function of the MLP, returns x: NxL array (see above)
+"""
+
 import numpy as np
 
 
-
-
-
-#N = 3 # number of neurons per layer
-#L = 2   # number of layers
-
 def phi ( ell , x ):
-    """ activation function for a neuron on layer ell """
+    """ Activation function for a neuron on layer ell """
     if ell == 0:
         return x
     else:
-        return np.heaviside( x, 0 )
-phi = np.frompyfunc( phi , 2 , 1 ) # make the function phi "universal" (ufunc in numpy)
+        return np.heaviside( x, 0 ) * x
+phi = np.frompyfunc( phi , 2 , 1 )  # make the function phi "universal" (ufunc in numpy)
 
 
-def create_random_weights( N , L ):
-    """ creates random weights b is a N-dim vector and w NxN-matrix"""
-    w = np.random.rand(N,N,L)
-    b = np.random.rand(N,L)
-    #print("w = ", w)
-    #print("b = ", b)
-    return [b, w]
+def phi_prime( ell , x ):
+    """ Derivative of the activation function for a neuron on layer ell """
+    if ell == 0:
+        return x
+    else:
+        return np.heaviside( x, 0 ) 
+phi_prime = np.frompyfunc( phi , 2 , 1 )  # make the function phi "universal" (ufunc in numpy)
 
 
-def transition ( b , w , f_input ):
-    """ Transition function of the MLP: output = F(b,w,f_input) """
+def transition ( b , W , f_input ):
+    """ Transition function of the MLP: output = F(b,W,f_input) """
     # I'm trusting the sizes match and are well defined..
     N = b[ : , 0 ].size 
     L = b[ 0 , : ].size
 
-    # Create the "layer-functions"
-    X = np.empty(shape=(N, L+1), dtype=float)
-
-    X[:, 0] = f_input
+    # Compute the "partial inputs", i.e. the Nx(L+1) array x
+    x = np.empty(shape=(N, L+1), dtype=float)  # initialization
+    x[:, 0] = f_input
     for ell in range(L):
-        #print( "ell = ", ell )
-        #print( "w[ ell = ", ell, "] = ", w[ :, :, ell] )
-        #print( "b[ ell = ", ell, "] = ", b[:, ell] )
-        X[ : , ell+1 ] = b[ : , ell ]  +  w[ : , : , ell ] @ phi ( ell ,  X[ : , ell ]  )    
-        #print( "phi = ", phi( ell , X[ : , ell ] ) )
-        #print( "X[ ell+1 = ", ell+1,  " ] = ", X[ : , ell+1 ] )
+        x[ : , ell+1 ] = b[ : , ell ]  +  W[ : , : , ell ] @ phi ( ell ,  x[ : , ell ]  )    
+    return x
 
-    return X
+
+def create_random_weights( N , L ):
+    """ Returns [b,W] random weights, where b is a NxL-dim array and W NxNxL-matrix"""
+    W = np.random.rand(N,N,L)
+    b = np.random.rand(N,L)
+    #print("w = ", w)
+    #print("b = ", b)
+    return [b, W]
 
 
 
@@ -58,9 +69,9 @@ def main():
 
     f_input = np.random.rand(N)  # input data
 
-    [b,w] = create_random_weights(N,L)  # weights
-    X = transition( b , w , f_input )
-    print( "MLP output = " , X[ : , L] )
+    [b,W] = create_random_weights(N,L)  # weights
+    x = transition( b , W , f_input )
+    print( "MLP output = " , x[ : , L] )
     
 if __name__ == "__main__":
     main()
